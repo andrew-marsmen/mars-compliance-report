@@ -1,0 +1,2706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Mars Men · Compliance Findings</title>
+</head>
+<body>
+<meta charset="utf-8">
+<title>Mars Men · Compliance Bot</title>
+<style>
+  :root {
+    --bg: #0b0b0d; --surface: #141417; --surface-2: #1c1c21; --line: #2a2a31;
+    --text: #ECECEE; --muted: #9b9ba6; --faint: #6c6c78;
+    --orange: #FF5A1F; --orange-dim: #c9420f;
+    --red: #ff5a5a; --red-bg: #2a1414; --green: #54d18c; --green-bg: #122a1d;
+    --high: #ff5a5a; --medium: #ffb020; --low: #6c8cff;
+    --claims: #ff8a3d; --a11y: #4fb6ff;
+    --mono: "SF Mono", "Martian Mono", ui-monospace, Menlo, Consolas, monospace;
+    --sans: "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans);
+    -webkit-font-smoothing: antialiased; line-height: 1.5; }
+  a { color: var(--orange); }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* Header */
+  header.top { border-bottom: 1px solid var(--line); background:
+    radial-gradient(120% 140% at 80% -20%, rgba(255,90,31,.16), transparent 60%), var(--bg); }
+  .top-in { max-width: 1000px; margin: 0 auto; padding: 26px 20px 22px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; font-size: 13px; color: var(--muted); }
+  .brand b { color: var(--orange); }
+  .brand .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    box-shadow: 0 0 10px var(--green); }
+  h1 { font-size: 30px; margin: 12px 0 4px; letter-spacing: -.02em; }
+  h1 .sub { color: var(--orange); }
+  .tag { color: var(--muted); font-size: 14px; }
+  .scanmeta { margin-top: 14px; font-family: var(--mono); font-size: 12px; color: var(--faint);
+    display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .scanmeta b { color: var(--muted); font-weight: 500; }
+
+  /* Summary */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px;
+    margin: 24px 0 8px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .stat .n { font-size: 30px; font-weight: 700; line-height: 1; font-family: var(--mono); }
+  .stat .l { color: var(--muted); font-size: 12px; margin-top: 8px; text-transform: uppercase;
+    letter-spacing: .08em; }
+  .stat.high .n { color: var(--high); } .stat.medium .n { color: var(--medium); }
+  .stat.low .n { color: var(--low); }
+  .stat.bar { display: flex; flex-direction: column; justify-content: center; }
+  .split { display: flex; height: 8px; border-radius: 6px; overflow: hidden; margin-top: 10px; background: var(--surface-2); }
+  .split i { display: block; height: 100%; }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 2px;
+    margin-right: 5px; vertical-align: middle; }
+  .legend .lc::before { background: var(--claims); } .legend .la::before { background: var(--a11y); }
+
+  /* Toolbar */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 22px 0 18px;
+    position: sticky; top: 0; background: linear-gradient(var(--bg) 70%, transparent); padding: 14px 0; z-index: 5; }
+  .seg { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+  .seg button { background: none; border: 0; color: var(--muted); padding: 7px 14px; border-radius: 7px;
+    font-size: 13px; cursor: pointer; font-family: var(--sans); font-weight: 600; }
+  .seg button.on { background: var(--surface-2); color: var(--text); }
+  .seg button.on.claims { color: var(--claims); } .seg button.on.a11y { color: var(--a11y); }
+  .search { flex: 1; min-width: 160px; background: var(--surface); border: 1px solid var(--line);
+    color: var(--text); border-radius: 10px; padding: 9px 14px; font-size: 13px; font-family: var(--sans); }
+  .search::placeholder { color: var(--faint); }
+  .count { color: var(--faint); font-size: 13px; font-family: var(--mono); }
+
+  /* Issue card */
+  .issue { background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px 22px; margin-bottom: 16px; border-left: 3px solid var(--line); }
+  .issue.high { border-left-color: var(--high); } .issue.medium { border-left-color: var(--medium); }
+  .issue.low { border-left-color: var(--low); }
+  .ihead { display: flex; gap: 12px; align-items: flex-start; }
+  .idx { font-family: var(--mono); color: var(--faint); font-size: 13px; padding-top: 2px; min-width: 28px; }
+  .ititle { font-size: 16px; font-weight: 600; margin: 0 0 8px; flex: 1; letter-spacing: -.01em; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; padding-left: 40px; }
+  .badge { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .badge.sev-high { background: var(--red-bg); color: var(--high); border-color: transparent; }
+  .badge.sev-medium { background: #2a2410; color: var(--medium); border-color: transparent; }
+  .badge.sev-low { background: #161b2e; color: var(--low); border-color: transparent; }
+  .badge.reg { color: var(--orange); border-color: rgba(255,90,31,.35); }
+  .badge.loc { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted); }
+  .body { padding-left: 40px; }
+  .label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--faint); margin: 16px 0 7px; }
+  .flagged { font-family: var(--mono); font-size: 13.5px; background: var(--red-bg);
+    border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; padding: 11px 14px; color: #ffd7d7;
+    white-space: pre-wrap; word-break: break-word; }
+  .why { color: var(--muted); font-size: 14px; }
+  .fix { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+  .col { border-radius: 10px; padding: 12px 14px; font-size: 13.5px; }
+  .col .h { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+  .col.cur { background: var(--red-bg); } .col.cur .h { color: var(--red); }
+  .col.sug { background: var(--green-bg); } .col.sug .h { color: var(--green); }
+  .col .txt { color: var(--text); font-family: var(--mono); font-size: 13px; word-break: break-word; }
+  .footer { display: flex; align-items: center; gap: 12px; padding-left: 40px; margin-top: 16px;
+    border-top: 1px solid var(--line); padding-top: 12px; font-size: 12px; color: var(--faint); }
+  .prio { font-family: var(--mono); font-weight: 700; color: var(--orange); }
+  .empty { text-align: center; color: var(--faint); padding: 60px 0; }
+  .pagefoot { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line);
+    color: var(--faint); font-size: 12.5px; line-height: 1.7; max-width: 720px; }
+  .pagefoot strong { color: var(--muted); } .pagefoot em { color: var(--muted); font-style: italic; }
+  @media (max-width: 640px) { .fix { grid-template-columns: 1fr; } .badges, .body, .footer { padding-left: 0; } }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="dot"></span> Mars Men <b>· Compliance Bot</b></div>
+    <h1>Scan. Fix. <span class="sub">Stay compliant.</span></h1>
+    <div class="tag">Automated FTC/FDA marketing-claims &amp; WCAG/ADA accessibility scan of the live store.</div>
+    <div class="scanmeta" id="scanmeta"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="cards" id="cards"></div>
+
+  <div class="toolbar">
+    <div class="seg" id="domainSeg">
+      <button data-d="all" class="on">All</button>
+      <button data-d="claims" class="claims">Claims</button>
+      <button data-d="accessibility" class="a11y">Accessibility</button>
+    </div>
+    <div class="seg" id="sevSeg">
+      <button data-s="all" class="on">All severity</button>
+      <button data-s="high">High</button>
+      <button data-s="medium">Medium</button>
+      <button data-s="low">Low</button>
+    </div>
+    <input class="search" id="search" placeholder="Search flagged text, page, regulation…" />
+    <span class="count" id="count"></span>
+  </div>
+
+  <div id="list"></div>
+
+  <footer class="pagefoot">
+    Generated by the Mars Men Compliance Bot — an automated scan of the live store for
+    FTC/FDA marketing-claims and WCAG&nbsp;2.2 accessibility risks, each with a suggested fix.
+    It flags <em>likely</em> issues to triage fast; it is <strong>not legal advice</strong>.
+    High-severity claims should be reviewed by counsel, and any retained claim needs
+    competent and reliable scientific evidence on file.
+  </footer>
+</div>
+
+<script>
+const SEV = { high: "High", medium: "Medium", low: "Low" };
+const BAKED = {
+  "meta": {
+    "site": "https://mengotomars.com",
+    "pagesScanned": [
+      {
+        "path": "/",
+        "name": "Homepage",
+        "type": "Homepage",
+        "fragments": 120,
+        "bytes": 497333,
+        "claims": 20,
+        "accessibility": 8
+      },
+      {
+        "path": "/products/30-day-supply-starter-kit",
+        "name": "30-Day Starter Kit",
+        "type": "PDP",
+        "fragments": 290,
+        "bytes": 1238721,
+        "claims": 31,
+        "accessibility": 25
+      },
+      {
+        "path": "/products/natural-testosterone-support-try-once",
+        "name": "Try Once",
+        "type": "PDP",
+        "fragments": 244,
+        "bytes": 1178304,
+        "claims": 25,
+        "accessibility": 24
+      },
+      {
+        "path": "/pages/prepare-for-lift-off",
+        "name": "Prepare for Lift-Off",
+        "type": "Content",
+        "fragments": 125,
+        "bytes": 469696,
+        "claims": 8,
+        "accessibility": 6
+      },
+      {
+        "path": "/pages/apple-watch-ultra-giveaway",
+        "name": "Apple Watch Giveaway",
+        "type": "Promo",
+        "fragments": 93,
+        "bytes": 331461,
+        "claims": 17,
+        "accessibility": 6
+      }
+    ],
+    "totals": {
+      "all": 170,
+      "claims": 101,
+      "accessibility": 69,
+      "high": 84,
+      "medium": 60,
+      "low": 26
+    },
+    "scannedAt": "2026-07-01T13:58:08.213Z"
+  },
+  "findings": [
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — $0",
+      "page": "30-Day Starter Kit",
+      "flagged": "Improves fertility and boosts testosterone levels.",
+      "match": "Improves fertility",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "supports reproductive wellness — avoid \"fertility\", as infertility is a medical condition (disease-claim territory).",
+      "id": 1
+    },
+    {
+      "domain": "claims",
+      "ruleId": "negative-option",
+      "regulation": "FTC — Negative Option / Auto-Renewal",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — Natural Testosterone Support",
+      "page": "30-Day Starter Kit",
+      "flagged": "SUBSCRIBE & SAVE 50% OFF",
+      "match": "SUBSCRIBE & SAVE",
+      "why": "Subscription/auto-renewal offers are a hot FTC enforcement area (ROSCA + the Negative Option Rule, plus state laws like California). They require clear up-front disclosure of the recurring amount and frequency, express informed consent before billing, and simple cancellation — disclosed at checkout, not just in an FAQ.",
+      "suggest": "Disclose the recurring charge amount, frequency, and how to cancel — clearly and conspicuously before payment, adjacent to the subscribe action.",
+      "id": 2
+    },
+    {
+      "domain": "claims",
+      "ruleId": "negative-option",
+      "regulation": "FTC — Negative Option / Auto-Renewal",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — Natural Testosterone Support",
+      "page": "30-Day Starter Kit",
+      "flagged": "Skip, pause, or cancel anytime.",
+      "match": "cancel anytime",
+      "why": "Subscription/auto-renewal offers are a hot FTC enforcement area (ROSCA + the Negative Option Rule, plus state laws like California). They require clear up-front disclosure of the recurring amount and frequency, express informed consent before billing, and simple cancellation — disclosed at checkout, not just in an FAQ.",
+      "suggest": "Disclose the recurring charge amount, frequency, and how to cancel — clearly and conspicuously before payment, adjacent to the subscribe action.",
+      "id": 3
+    },
+    {
+      "domain": "claims",
+      "ruleId": "negative-option",
+      "regulation": "FTC — Negative Option / Auto-Renewal",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — Natural Testosterone Support",
+      "page": "30-Day Starter Kit",
+      "flagged": "SUBSCRIBE & SAVE 50% OFF FOR LIFE",
+      "match": "SUBSCRIBE & SAVE",
+      "why": "Subscription/auto-renewal offers are a hot FTC enforcement area (ROSCA + the Negative Option Rule, plus state laws like California). They require clear up-front disclosure of the recurring amount and frequency, express informed consent before billing, and simple cancellation — disclosed at checkout, not just in an FAQ.",
+      "suggest": "Disclose the recurring charge amount, frequency, and how to cancel — clearly and conspicuously before payment, adjacent to the subscribe action.",
+      "id": 4
+    },
+    {
+      "domain": "claims",
+      "ruleId": "drug-mechanism",
+      "regulation": "FDA — Drug-like Mechanism Claims",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — 90-Day Supply",
+      "page": "30-Day Starter Kit",
+      "flagged": "Tongkat Ali blocks stress hormones",
+      "match": "blocks",
+      "why": "Describing a direct pharmacological mechanism (blocking, inhibiting, feeding cells, forcing production) implies drug-like action that requires FDA drug approval. Supplements support normal function; they do not act on disease pathways.",
+      "suggest": "studied for its role in supporting a healthy stress response",
+      "id": 5
+    },
+    {
+      "domain": "claims",
+      "ruleId": "drug-mechanism",
+      "regulation": "FDA — Drug-like Mechanism Claims",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — 90-Day Supply",
+      "page": "30-Day Starter Kit",
+      "flagged": "Shilajit feeds starving testosterone cells",
+      "match": "feeds",
+      "why": "Describing a direct pharmacological mechanism (blocking, inhibiting, feeding cells, forcing production) implies drug-like action that requires FDA drug approval. Supplements support normal function; they do not act on disease pathways.",
+      "suggest": "supports mitochondrial energy and healthy testosterone metabolism",
+      "id": 6
+    },
+    {
+      "domain": "claims",
+      "ruleId": "quantified-result",
+      "regulation": "FTC — Specific / Quantified Results",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — 90-Day Supply",
+      "page": "30-Day Starter Kit",
+      "flagged": "Many customers report total testosterone reading increases of nearly 300 points, which can support lean body mass and building muscle in the gym.",
+      "match": "nearly 300",
+      "why": "Specific, quantified outcome claims (e.g. \"+300 points\", \"massive increase\") require competent and reliable scientific evidence and must reflect what consumers can typically expect, with clear typicality disclosure.",
+      "suggest": "Remove the specific point claim. If retained, it must be backed by competent and reliable scientific evidence and presented with typical-results context.",
+      "id": 7
+    },
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — Tongkat Ali",
+      "page": "30-Day Starter Kit",
+      "flagged": "Boosts testosterone, enhances libido, improves fertility & supports muscle growth",
+      "match": "improves fertility",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "supports reproductive wellness — avoid \"fertility\", as infertility is a medical condition (disease-claim territory).",
+      "id": 8
+    },
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — Shilajit",
+      "page": "30-Day Starter Kit",
+      "flagged": "Improves fertility and boosts testosterone levels",
+      "match": "Improves fertility",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "supports reproductive wellness — avoid \"fertility\", as infertility is a medical condition (disease-claim territory).",
+      "id": 9
+    },
+    {
+      "domain": "claims",
+      "ruleId": "quantified-result",
+      "regulation": "FTC — Specific / Quantified Results",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — I feel 25 again",
+      "page": "30-Day Starter Kit",
+      "flagged": "Lost 30 pounds of fat, gained muscle, and my wife can't keep her hands off me now.",
+      "match": "30 pounds",
+      "why": "Specific, quantified outcome claims (e.g. \"+300 points\", \"massive increase\") require competent and reliable scientific evidence and must reflect what consumers can typically expect, with clear typicality disclosure.",
+      "suggest": "Remove the specific figure or substantiate it with product evidence and add a typical-results basis. Prefer qualitative support language.",
+      "id": 10
+    },
+    {
+      "domain": "claims",
+      "ruleId": "quantified-result",
+      "regulation": "FTC — Specific / Quantified Results",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "30-Day Starter Kit",
+      "flagged": "3 weeks in and I have more energy during the day, I'm resting 100x better at night, focus isn't lacking!",
+      "match": "100x",
+      "why": "Specific, quantified outcome claims (e.g. \"+300 points\", \"massive increase\") require competent and reliable scientific evidence and must reflect what consumers can typically expect, with clear typicality disclosure.",
+      "suggest": "Remove the specific figure or substantiate it with product evidence and add a typical-results basis. Prefer qualitative support language.",
+      "id": 11
+    },
+    {
+      "domain": "claims",
+      "ruleId": "disclaimer-placement",
+      "regulation": "FTC / 21 CFR 101.93(d) — Disclaimer Placement",
+      "severity": "high",
+      "priority": "P2",
+      "location": "PDP — page-wide",
+      "page": "30-Day Starter Kit",
+      "flagged": "Disclaimer appears only near the page end (≈99% down) while 67 structure/function claim sections run throughout.",
+      "why": "21 CFR 101.93(d) requires the DSHEA disclaimer to appear prominently and adjacent to the structure/function claims. A footer-only disclaimer does not satisfy the rule when claims appear repeatedly in large, prominent text up the page.",
+      "suggest": "Add a reusable disclaimer block (≥13px, WCAG-AA contrast, not faded gray) after each claims section (hero, ingredient grid, timeline, testimonials, PDP), with an asterisk linking each claim to it. Keep the footer disclaimer too.",
+      "id": 12
+    },
+    {
+      "domain": "claims",
+      "ruleId": "drug-mechanism",
+      "regulation": "FDA — Drug-like Mechanism Claims",
+      "severity": "high",
+      "priority": "P1",
+      "location": "Promo — XII. Sponsor’s Right to Modify",
+      "page": "Apple Watch Giveaway",
+      "flagged": "Mars Men reserves the right to modify, suspend, or terminate the Sweepstakes (or any portion thereof) at any time without prior notice, in the event of force majeure or any other circumstance impacting the integrity or operation of the Sweepstakes.",
+      "match": "force",
+      "why": "Describing a direct pharmacological mechanism (blocking, inhibiting, feeding cells, forcing production) implies drug-like action that requires FDA drug approval. Supplements support normal function; they do not act on disease pathways.",
+      "suggest": "Replace the mechanistic verb (blocks / inhibits / feeds / forces) with supportive language: \"studied for its role in supporting…\" or \"supports healthy…\".",
+      "id": 13
+    },
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "Homepage — Tongkat Ali",
+      "page": "Homepage",
+      "flagged": "Boosts testosterone, enhances libido, improves fertility & supports muscle growth",
+      "match": "improves fertility",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "supports reproductive wellness — avoid \"fertility\", as infertility is a medical condition (disease-claim territory).",
+      "id": 14
+    },
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "Homepage — Shilajit",
+      "page": "Homepage",
+      "flagged": "Improves fertility and boosts testosterone levels",
+      "match": "Improves fertility",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "supports reproductive wellness — avoid \"fertility\", as infertility is a medical condition (disease-claim territory).",
+      "id": 15
+    },
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "THE DECLINE OF T: A MODERN EPIDEMIC",
+      "match": "DECLINE OF T",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "Reframe away from disease framing: \"Testosterone naturally changes with age and lifestyle.\" Don’t position low testosterone (a medical condition) as the problem the product treats.",
+      "id": 16
+    },
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Low testosterone drains energy, strength, and focus—making it harder to perform at your best in life and the gym.",
+      "match": "Low testosterone drains",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "Drop the disease framing. Describe age-related, natural changes and how the product supports normal function — never as the cure for a named condition.",
+      "id": 17
+    },
+    {
+      "domain": "claims",
+      "ruleId": "drug-mechanism",
+      "regulation": "FDA — Drug-like Mechanism Claims",
+      "severity": "high",
+      "priority": "P1",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Tongkat Ali blocks stress hormones",
+      "match": "blocks",
+      "why": "Describing a direct pharmacological mechanism (blocking, inhibiting, feeding cells, forcing production) implies drug-like action that requires FDA drug approval. Supplements support normal function; they do not act on disease pathways.",
+      "suggest": "studied for its role in supporting a healthy stress response",
+      "id": 18
+    },
+    {
+      "domain": "claims",
+      "ruleId": "drug-mechanism",
+      "regulation": "FDA — Drug-like Mechanism Claims",
+      "severity": "high",
+      "priority": "P1",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Shilajit feeds starving testosterone cells",
+      "match": "feeds",
+      "why": "Describing a direct pharmacological mechanism (blocking, inhibiting, feeding cells, forcing production) implies drug-like action that requires FDA drug approval. Supplements support normal function; they do not act on disease pathways.",
+      "suggest": "supports mitochondrial energy and healthy testosterone metabolism",
+      "id": 19
+    },
+    {
+      "domain": "claims",
+      "ruleId": "quantified-result",
+      "regulation": "FTC — Specific / Quantified Results",
+      "severity": "high",
+      "priority": "P1",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Many customers report total testosterone reading increases of nearly 300 points, which can support lean body mass and building muscle in the gym.",
+      "match": "nearly 300",
+      "why": "Specific, quantified outcome claims (e.g. \"+300 points\", \"massive increase\") require competent and reliable scientific evidence and must reflect what consumers can typically expect, with clear typicality disclosure.",
+      "suggest": "Remove the specific point claim. If retained, it must be backed by competent and reliable scientific evidence and presented with typical-results context.",
+      "id": 20
+    },
+    {
+      "domain": "claims",
+      "ruleId": "disclaimer-placement",
+      "regulation": "FTC / 21 CFR 101.93(d) — Disclaimer Placement",
+      "severity": "high",
+      "priority": "P2",
+      "location": "Homepage — page-wide",
+      "page": "Homepage",
+      "flagged": "Disclaimer appears only near the page end (≈94% down) while 40 structure/function claim sections run throughout.",
+      "why": "21 CFR 101.93(d) requires the DSHEA disclaimer to appear prominently and adjacent to the structure/function claims. A footer-only disclaimer does not satisfy the rule when claims appear repeatedly in large, prominent text up the page.",
+      "suggest": "Add a reusable disclaimer block (≥13px, WCAG-AA contrast, not faded gray) after each claims section (hero, ingredient grid, timeline, testimonials, PDP), with an asterisk linking each claim to it. Keep the footer disclaimer too.",
+      "id": 21
+    },
+    {
+      "domain": "claims",
+      "ruleId": "drug-mechanism",
+      "regulation": "FDA — Drug-like Mechanism Claims",
+      "severity": "high",
+      "priority": "P1",
+      "location": "Content — $0",
+      "page": "Prepare for Lift-Off",
+      "flagged": "Supports T & blocks estrogen conversion",
+      "match": "blocks",
+      "why": "Describing a direct pharmacological mechanism (blocking, inhibiting, feeding cells, forcing production) implies drug-like action that requires FDA drug approval. Supplements support normal function; they do not act on disease pathways.",
+      "suggest": "Replace the mechanistic verb (blocks / inhibits / feeds / forces) with supportive language: \"studied for its role in supporting…\" or \"supports healthy…\".",
+      "id": 22
+    },
+    {
+      "domain": "claims",
+      "ruleId": "disclaimer-placement",
+      "regulation": "FTC / 21 CFR 101.93(d) — Disclaimer Placement",
+      "severity": "high",
+      "priority": "P2",
+      "location": "Content — page-wide",
+      "page": "Prepare for Lift-Off",
+      "flagged": "Disclaimer appears only near the page end (≈94% down) while 19 structure/function claim sections run throughout.",
+      "why": "21 CFR 101.93(d) requires the DSHEA disclaimer to appear prominently and adjacent to the structure/function claims. A footer-only disclaimer does not satisfy the rule when claims appear repeatedly in large, prominent text up the page.",
+      "suggest": "Add a reusable disclaimer block (≥13px, WCAG-AA contrast, not faded gray) after each claims section (hero, ingredient grid, timeline, testimonials, PDP), with an asterisk linking each claim to it. Keep the footer disclaimer too.",
+      "id": 23
+    },
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — $0",
+      "page": "Try Once",
+      "flagged": "Improves fertility and boosts testosterone levels.",
+      "match": "Improves fertility",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "supports reproductive wellness — avoid \"fertility\", as infertility is a medical condition (disease-claim territory).",
+      "id": 24
+    },
+    {
+      "domain": "claims",
+      "ruleId": "drug-mechanism",
+      "regulation": "FDA — Drug-like Mechanism Claims",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — 90-Day Supply",
+      "page": "Try Once",
+      "flagged": "Tongkat Ali blocks stress hormones",
+      "match": "blocks",
+      "why": "Describing a direct pharmacological mechanism (blocking, inhibiting, feeding cells, forcing production) implies drug-like action that requires FDA drug approval. Supplements support normal function; they do not act on disease pathways.",
+      "suggest": "studied for its role in supporting a healthy stress response",
+      "id": 25
+    },
+    {
+      "domain": "claims",
+      "ruleId": "drug-mechanism",
+      "regulation": "FDA — Drug-like Mechanism Claims",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — 90-Day Supply",
+      "page": "Try Once",
+      "flagged": "Shilajit feeds starving testosterone cells",
+      "match": "feeds",
+      "why": "Describing a direct pharmacological mechanism (blocking, inhibiting, feeding cells, forcing production) implies drug-like action that requires FDA drug approval. Supplements support normal function; they do not act on disease pathways.",
+      "suggest": "supports mitochondrial energy and healthy testosterone metabolism",
+      "id": 26
+    },
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — Tongkat Ali",
+      "page": "Try Once",
+      "flagged": "Boosts testosterone, enhances libido, improves fertility & supports muscle growth",
+      "match": "improves fertility",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "supports reproductive wellness — avoid \"fertility\", as infertility is a medical condition (disease-claim territory).",
+      "id": 27
+    },
+    {
+      "domain": "claims",
+      "ruleId": "condition-framing",
+      "regulation": "FDA — Disease-Claim Framing",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — Shilajit",
+      "page": "Try Once",
+      "flagged": "Improves fertility and boosts testosterone levels",
+      "match": "Improves fertility",
+      "why": "Naming or framing a medical condition (low-T/hypogonadism, infertility, erectile issues) — or positioning the product as \"the solution\" to a \"modern epidemic\" — implies the supplement treats a disease, a common trigger for FDA disease-claim warning letters.",
+      "suggest": "supports reproductive wellness — avoid \"fertility\", as infertility is a medical condition (disease-claim territory).",
+      "id": 28
+    },
+    {
+      "domain": "claims",
+      "ruleId": "quantified-result",
+      "regulation": "FTC — Specific / Quantified Results",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — I feel 25 again",
+      "page": "Try Once",
+      "flagged": "Lost 30 pounds of fat, gained muscle, and my wife can't keep her hands off me now.",
+      "match": "30 pounds",
+      "why": "Specific, quantified outcome claims (e.g. \"+300 points\", \"massive increase\") require competent and reliable scientific evidence and must reflect what consumers can typically expect, with clear typicality disclosure.",
+      "suggest": "Remove the specific figure or substantiate it with product evidence and add a typical-results basis. Prefer qualitative support language.",
+      "id": 29
+    },
+    {
+      "domain": "claims",
+      "ruleId": "quantified-result",
+      "regulation": "FTC — Specific / Quantified Results",
+      "severity": "high",
+      "priority": "P1",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "Try Once",
+      "flagged": "3 weeks in and I have more energy during the day, I'm resting 100x better at night, focus isn't lacking!",
+      "match": "100x",
+      "why": "Specific, quantified outcome claims (e.g. \"+300 points\", \"massive increase\") require competent and reliable scientific evidence and must reflect what consumers can typically expect, with clear typicality disclosure.",
+      "suggest": "Remove the specific figure or substantiate it with product evidence and add a typical-results basis. Prefer qualitative support language.",
+      "id": 30
+    },
+    {
+      "domain": "claims",
+      "ruleId": "disclaimer-placement",
+      "regulation": "FTC / 21 CFR 101.93(d) — Disclaimer Placement",
+      "severity": "high",
+      "priority": "P2",
+      "location": "PDP — page-wide",
+      "page": "Try Once",
+      "flagged": "Disclaimer appears only near the page end (≈98% down) while 62 structure/function claim sections run throughout.",
+      "why": "21 CFR 101.93(d) requires the DSHEA disclaimer to appear prominently and adjacent to the structure/function claims. A footer-only disclaimer does not satisfy the rule when claims appear repeatedly in large, prominent text up the page.",
+      "suggest": "Add a reusable disclaimer block (≥13px, WCAG-AA contrast, not faded gray) after each claims section (hero, ingredient grid, timeline, testimonials, PDP), with an asterisk linking each claim to it. Keep the footer disclaimer too.",
+      "id": 31
+    },
+    {
+      "domain": "claims",
+      "ruleId": "superlative",
+      "regulation": "FTC — Superlative / Comparative",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Natural Testosterone Support",
+      "page": "30-Day Starter Kit",
+      "flagged": "Mars Men is the most potent and natural testosterone stack on earth.",
+      "match": "most potent",
+      "why": "Unqualified superlatives and comparative claims (\"most potent\", \"#1\", \"on the planet\") are establishment claims that require head-to-head substantiation. Without it they are deceptive, not mere puffery.",
+      "suggest": "A natural testosterone-support supplement. Drop superlatives like \"most potent on the planet\" unless you can substantiate a comparative claim.",
+      "id": 32
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Natural Testosterone Support",
+      "page": "30-Day Starter Kit",
+      "flagged": "90-Day 100% Money-Back Guarantee",
+      "match": "100% ",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 33
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Natural Testosterone Support",
+      "page": "30-Day Starter Kit",
+      "flagged": "Try Risk-Free for 90 Days or 100% Money Back",
+      "match": "100% ",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 34
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — 90-Day Supply",
+      "page": "30-Day Starter Kit",
+      "flagged": "T-production optimized fully",
+      "match": "optimized",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 35
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — 90-Day Supply",
+      "page": "30-Day Starter Kit",
+      "flagged": "Not temporary, this is your new normal",
+      "match": "new normal",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "support for your long-term vitality",
+      "id": 36
+    },
+    {
+      "domain": "claims",
+      "ruleId": "testimonial-typicality",
+      "regulation": "FTC — Testimonials / Typicality",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — 90-Day Supply",
+      "page": "30-Day Starter Kit",
+      "flagged": "Within the first week, most men experienced out of this world increases in energy, improved sleep quality, and heightened mental focus… Within four weeks, a massive increase in strength, vitality, and power becomes noticeable.",
+      "match": "most men experienced",
+      "why": "Outcome statements attributed to customers (\"most men experienced…\", \"many customers report…\") are efficacy claims. They need substantiation and a clear basis; if results are not typical, that must be disclosed.",
+      "suggest": "In a customer survey, many men reported improved energy within the first week. Individual results vary.",
+      "id": 37
+    },
+    {
+      "domain": "claims",
+      "ruleId": "testimonial-typicality",
+      "regulation": "FTC — Testimonials / Typicality",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — 90-Day Supply",
+      "page": "30-Day Starter Kit",
+      "flagged": "Many customers report total testosterone reading increases of nearly 300 points, which can support lean body mass and building muscle in the gym.",
+      "match": "Many customers report",
+      "why": "Outcome statements attributed to customers (\"most men experienced…\", \"many customers report…\") are efficacy claims. They need substantiation and a clear basis; if results are not typical, that must be disclosed.",
+      "suggest": "Remove the specific point claim. If retained, it must be backed by competent and reliable scientific evidence and presented with typical-results context.",
+      "id": 38
+    },
+    {
+      "domain": "claims",
+      "ruleId": "establishment-clinical",
+      "regulation": "FTC — Implied Clinical Efficacy",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Boron",
+      "page": "30-Day Starter Kit",
+      "flagged": "Natural Testosterone Support is a unique blend of natural herbs and minerals that are scientifically proven to support healthy testosterone levels and overall well-being.",
+      "match": "scientifically proven",
+      "why": "Establishment claims (\"clinically proven/dosed\") imply the finished product was clinically tested and require competent and reliable scientific evidence on the product itself. Ingredient-level studies do not substantiate a finished-product clinical claim.",
+      "suggest": "Cite ingredient research instead of the finished product: \"formulated with ingredients studied at research-backed doses.\" Keep substantiation on file.",
+      "id": 39
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "30-Day Starter Kit",
+      "flagged": "Testosterone production is now more optimized, and results should feel more consistent.",
+      "match": "optimized",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 40
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "30-Day Starter Kit",
+      "flagged": "You’re reinforcing habits that will maximize results over the long run.",
+      "match": "maximize",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 41
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "30-Day Starter Kit",
+      "flagged": "We make sure every customer actually gets results or we refund you 100% of your investment.",
+      "match": "100% ",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 42
+    },
+    {
+      "domain": "claims",
+      "ruleId": "superlative",
+      "regulation": "FTC — Superlative / Comparative",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "30-Day Starter Kit",
+      "flagged": "Clinical research shows that continuous, daily intake is the best way to get the most out of Mars Men.",
+      "match": "the best",
+      "why": "Unqualified superlatives and comparative claims (\"most potent\", \"#1\", \"on the planet\") are establishment claims that require head-to-head substantiation. Without it they are deceptive, not mere puffery.",
+      "suggest": "Ingredient studies suggest — cite the specific ingredient research rather than implying the finished product was clinically tested.",
+      "id": 43
+    },
+    {
+      "domain": "claims",
+      "ruleId": "establishment-clinical",
+      "regulation": "FTC — Implied Clinical Efficacy",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "30-Day Starter Kit",
+      "flagged": "Clinical research shows that continuous, daily intake is the best way to get the most out of Mars Men.",
+      "match": "Clinical research shows",
+      "why": "Establishment claims (\"clinically proven/dosed\") imply the finished product was clinically tested and require competent and reliable scientific evidence on the product itself. Ingredient-level studies do not substantiate a finished-product clinical claim.",
+      "suggest": "Ingredient studies suggest — cite the specific ingredient research rather than implying the finished product was clinically tested.",
+      "id": 44
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — $0",
+      "page": "Apple Watch Giveaway",
+      "flagged": "Apple Watch Ultra Giveaway",
+      "match": "Giveaway",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 45
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — $0",
+      "page": "Apple Watch Giveaway",
+      "flagged": "Mars Men Giveaway – Official Sweepstakes Rules",
+      "match": "Giveaway",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 46
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — I. Sweepstakes Period",
+      "page": "Apple Watch Giveaway",
+      "flagged": "The “Mars Men Monthly Apple Watch Ultra 3.0 Giveaway” (the “Sweepstakes”) begins at 12:00:01 a.m.",
+      "match": "Giveaway",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 47
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — II. Sponsor",
+      "page": "Apple Watch Giveaway",
+      "flagged": "The Sweepstakes is sponsored by",
+      "match": "Sweepstakes",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 48
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — III. Eligibility",
+      "page": "Apple Watch Giveaway",
+      "flagged": "The Sweepstakes is open only to legal residents of the",
+      "match": "Sweepstakes",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 49
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — III. Eligibility",
+      "page": "Apple Watch Giveaway",
+      "flagged": "The Sweepstakes is",
+      "match": "Sweepstakes",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 50
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — IV. How to Enter",
+      "page": "Apple Watch Giveaway",
+      "flagged": "no purchase necessary",
+      "match": "no purchase necessary",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 51
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — IV. How to Enter",
+      "page": "Apple Watch Giveaway",
+      "flagged": "“ Mars Men Monthly Apple Watch Ultra 3.0 Giveaway”,",
+      "match": "Giveaway",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 52
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — IV. How to Enter",
+      "page": "Apple Watch Giveaway",
+      "flagged": "Mars Men Giveaway - 1401 Lavaca St, Austin, TX 78701, United States",
+      "match": "Giveaway",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 53
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — VII. General Conditions",
+      "page": "Apple Watch Giveaway",
+      "flagged": "If technical failures, fraud, hacking, or other issues compromise the integrity of the Sweepstakes, the Sponsor may",
+      "match": "Sweepstakes",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 54
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — VII. General Conditions",
+      "page": "Apple Watch Giveaway",
+      "flagged": "the Sweepstakes and determine winners from eligible entries received prior to the disruption.",
+      "match": "Sweepstakes",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 55
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — IX. Disputes",
+      "page": "Apple Watch Giveaway",
+      "flagged": "To the fullest extent permitted by law, any disputes, claims, or causes of action arising out of or connected with the Sweepstakes shall be resolved",
+      "match": "Sweepstakes",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 56
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — X. Privacy",
+      "page": "Apple Watch Giveaway",
+      "flagged": "By entering the Sweepstakes, participants consent to the collection, usage, and disclosure of their personal information as set forth therein.",
+      "match": "Sweepstakes",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 57
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — XI. Winner List",
+      "page": "Apple Watch Giveaway",
+      "flagged": "Mars Men Monthly Apple Watch Ultra 3.0 Giveaway - Winner List Request",
+      "match": "Giveaway",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 58
+    },
+    {
+      "domain": "claims",
+      "ruleId": "sweepstakes",
+      "regulation": "FTC — Sweepstakes / Promotions",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Promo — XII. Sponsor’s Right to Modify",
+      "page": "Apple Watch Giveaway",
+      "flagged": "Mars Men reserves the right to modify, suspend, or terminate the Sweepstakes (or any portion thereof) at any time without prior notice, in the event of force majeure or any other circumstance impacting the integrity or operation of the Sweepstakes.",
+      "match": "Sweepstakes",
+      "why": "Sweepstakes and giveaways must post clear official rules (eligibility, start/end dates, odds, prize value, sponsor) and, in most cases, a \"no purchase necessary\" entry method. Conditioning entry on a purchase can make it an illegal lottery.",
+      "suggest": "Link to official rules covering eligibility, dates, odds, prize value, and sponsor, and provide a free \"no purchase necessary\" entry method.",
+      "id": 59
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "With Mars Men, your natural ability to forge usable testosterone is optimized.",
+      "match": "optimized",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Mars Men is formulated to support your body’s natural testosterone production.",
+      "id": 60
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "T-production optimized fully",
+      "match": "optimized",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 61
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Not temporary, this is your new normal",
+      "match": "new normal",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "support for your long-term vitality",
+      "id": 62
+    },
+    {
+      "domain": "claims",
+      "ruleId": "testimonial-typicality",
+      "regulation": "FTC — Testimonials / Typicality",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Within the first week, most men experienced out of this world increases in energy, improved sleep quality, and heightened mental focus...",
+      "match": "most men experienced",
+      "why": "Outcome statements attributed to customers (\"most men experienced…\", \"many customers report…\") are efficacy claims. They need substantiation and a clear basis; if results are not typical, that must be disclosed.",
+      "suggest": "In a customer survey, many men reported improved energy within the first week. Individual results vary.",
+      "id": 63
+    },
+    {
+      "domain": "claims",
+      "ruleId": "testimonial-typicality",
+      "regulation": "FTC — Testimonials / Typicality",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Many customers report total testosterone reading increases of nearly 300 points, which can support lean body mass and building muscle in the gym.",
+      "match": "Many customers report",
+      "why": "Outcome statements attributed to customers (\"most men experienced…\", \"many customers report…\") are efficacy claims. They need substantiation and a clear basis; if results are not typical, that must be disclosed.",
+      "suggest": "Remove the specific point claim. If retained, it must be backed by competent and reliable scientific evidence and presented with typical-results context.",
+      "id": 64
+    },
+    {
+      "domain": "claims",
+      "ruleId": "superlative",
+      "regulation": "FTC — Superlative / Comparative",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Clinical research shows that continuous, daily intake is the best way to get the most out of Mars Men.",
+      "match": "the best",
+      "why": "Unqualified superlatives and comparative claims (\"most potent\", \"#1\", \"on the planet\") are establishment claims that require head-to-head substantiation. Without it they are deceptive, not mere puffery.",
+      "suggest": "Ingredient studies suggest — cite the specific ingredient research rather than implying the finished product was clinically tested.",
+      "id": 65
+    },
+    {
+      "domain": "claims",
+      "ruleId": "establishment-clinical",
+      "regulation": "FTC — Implied Clinical Efficacy",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Clinical research shows that continuous, daily intake is the best way to get the most out of Mars Men.",
+      "match": "Clinical research shows",
+      "why": "Establishment claims (\"clinically proven/dosed\") imply the finished product was clinically tested and require competent and reliable scientific evidence on the product itself. Ingredient-level studies do not substantiate a finished-product clinical claim.",
+      "suggest": "Ingredient studies suggest — cite the specific ingredient research rather than implying the finished product was clinically tested.",
+      "id": 66
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Content — WHAT TO EXPECT",
+      "page": "Prepare for Lift-Off",
+      "flagged": "This is your new normal",
+      "match": "new normal",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "support for your long-term vitality",
+      "id": 67
+    },
+    {
+      "domain": "claims",
+      "ruleId": "superlative",
+      "regulation": "FTC — Superlative / Comparative",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Content — WHAT TO EXPECT",
+      "page": "Prepare for Lift-Off",
+      "flagged": "Clinical research shows that continuous, daily intake is the best way to get the most out of Mars Men.",
+      "match": "the best",
+      "why": "Unqualified superlatives and comparative claims (\"most potent\", \"#1\", \"on the planet\") are establishment claims that require head-to-head substantiation. Without it they are deceptive, not mere puffery.",
+      "suggest": "Ingredient studies suggest — cite the specific ingredient research rather than implying the finished product was clinically tested.",
+      "id": 68
+    },
+    {
+      "domain": "claims",
+      "ruleId": "establishment-clinical",
+      "regulation": "FTC — Implied Clinical Efficacy",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "Content — WHAT TO EXPECT",
+      "page": "Prepare for Lift-Off",
+      "flagged": "Clinical research shows that continuous, daily intake is the best way to get the most out of Mars Men.",
+      "match": "Clinical research shows",
+      "why": "Establishment claims (\"clinically proven/dosed\") imply the finished product was clinically tested and require competent and reliable scientific evidence on the product itself. Ingredient-level studies do not substantiate a finished-product clinical claim.",
+      "suggest": "Ingredient studies suggest — cite the specific ingredient research rather than implying the finished product was clinically tested.",
+      "id": 69
+    },
+    {
+      "domain": "claims",
+      "ruleId": "superlative",
+      "regulation": "FTC — Superlative / Comparative",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Natural Testosterone Support: Try Once",
+      "page": "Try Once",
+      "flagged": "Mars Men is the most potent and natural testosterone stack on earth.",
+      "match": "most potent",
+      "why": "Unqualified superlatives and comparative claims (\"most potent\", \"#1\", \"on the planet\") are establishment claims that require head-to-head substantiation. Without it they are deceptive, not mere puffery.",
+      "suggest": "A natural testosterone-support supplement. Drop superlatives like \"most potent on the planet\" unless you can substantiate a comparative claim.",
+      "id": 70
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Natural Testosterone Support: Try Once",
+      "page": "Try Once",
+      "flagged": "90-Day 100% Money-Back Guarantee",
+      "match": "100% ",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 71
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — 90-Day Supply",
+      "page": "Try Once",
+      "flagged": "T-production optimized fully",
+      "match": "optimized",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 72
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — 90-Day Supply",
+      "page": "Try Once",
+      "flagged": "Not temporary, this is your new normal",
+      "match": "new normal",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "support for your long-term vitality",
+      "id": 73
+    },
+    {
+      "domain": "claims",
+      "ruleId": "testimonial-typicality",
+      "regulation": "FTC — Testimonials / Typicality",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — 90-Day Supply",
+      "page": "Try Once",
+      "flagged": "Within the first week, most men experienced out of this world increases in energy, improved sleep quality, and heightened mental focus… Within four weeks, a massive increase in strength, vitality, and power becomes noticeable.",
+      "match": "most men experienced",
+      "why": "Outcome statements attributed to customers (\"most men experienced…\", \"many customers report…\") are efficacy claims. They need substantiation and a clear basis; if results are not typical, that must be disclosed.",
+      "suggest": "In a customer survey, many men reported improved energy within the first week. Individual results vary.",
+      "id": 74
+    },
+    {
+      "domain": "claims",
+      "ruleId": "superlative",
+      "regulation": "FTC — Superlative / Comparative",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — 90-Day Supply",
+      "page": "Try Once",
+      "flagged": "Clinical research shows that continuous, daily intake is the best way to get the most out of Mars Men.",
+      "match": "the best",
+      "why": "Unqualified superlatives and comparative claims (\"most potent\", \"#1\", \"on the planet\") are establishment claims that require head-to-head substantiation. Without it they are deceptive, not mere puffery.",
+      "suggest": "Ingredient studies suggest — cite the specific ingredient research rather than implying the finished product was clinically tested.",
+      "id": 75
+    },
+    {
+      "domain": "claims",
+      "ruleId": "establishment-clinical",
+      "regulation": "FTC — Implied Clinical Efficacy",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — 90-Day Supply",
+      "page": "Try Once",
+      "flagged": "Clinical research shows that continuous, daily intake is the best way to get the most out of Mars Men.",
+      "match": "Clinical research shows",
+      "why": "Establishment claims (\"clinically proven/dosed\") imply the finished product was clinically tested and require competent and reliable scientific evidence on the product itself. Ingredient-level studies do not substantiate a finished-product clinical claim.",
+      "suggest": "Ingredient studies suggest — cite the specific ingredient research rather than implying the finished product was clinically tested.",
+      "id": 76
+    },
+    {
+      "domain": "claims",
+      "ruleId": "establishment-clinical",
+      "regulation": "FTC — Implied Clinical Efficacy",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Boron",
+      "page": "Try Once",
+      "flagged": "Natural Testosterone Support is a unique blend of natural herbs and minerals that are scientifically proven to support healthy testosterone levels and overall well-being.",
+      "match": "scientifically proven",
+      "why": "Establishment claims (\"clinically proven/dosed\") imply the finished product was clinically tested and require competent and reliable scientific evidence on the product itself. Ingredient-level studies do not substantiate a finished-product clinical claim.",
+      "suggest": "Cite ingredient research instead of the finished product: \"formulated with ingredients studied at research-backed doses.\" Keep substantiation on file.",
+      "id": 77
+    },
+    {
+      "domain": "claims",
+      "ruleId": "testimonial-typicality",
+      "regulation": "FTC — Testimonials / Typicality",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "Try Once",
+      "flagged": "Most users report feeling a difference in energy levels after just a few days of taking Natural T Support.",
+      "match": "users report",
+      "why": "Outcome statements attributed to customers (\"most men experienced…\", \"many customers report…\") are efficacy claims. They need substantiation and a clear basis; if results are not typical, that must be disclosed.",
+      "suggest": "Add a typicality basis and \"Individual results vary.\" Ensure the underlying survey/data supports the stated proportion (\"most\", \"many\").",
+      "id": 78
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "Try Once",
+      "flagged": "Testosterone production is now more optimized, and results should feel more consistent.",
+      "match": "optimized",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 79
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "Try Once",
+      "flagged": "You’re reinforcing habits that will maximize results over the long run.",
+      "match": "maximize",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 80
+    },
+    {
+      "domain": "claims",
+      "ruleId": "absolute-permanent",
+      "regulation": "FTC — Absolute / Permanent Change",
+      "severity": "medium",
+      "priority": "P2",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "Try Once",
+      "flagged": "We make sure every customer actually gets results or we refund you 100% of your investment.",
+      "match": "100% ",
+      "why": "Absolute or permanent-change wording (\"your new normal\", \"optimized\", \"permanently\") implies a guaranteed, lasting physiological change the supplement cannot promise. Claims must be qualified and achievable.",
+      "suggest": "Qualify the claim: replace absolute/permanent wording with \"supports\" / \"helps maintain\" and frame benefits as ongoing daily support, not a permanent change.",
+      "id": 81
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — 30-Day Starter Kit",
+      "page": "30-Day Starter Kit",
+      "flagged": "90 Day Higher T Guarantee",
+      "match": "90 Day Higher T Guarantee",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 82
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — Natural Testosterone Support",
+      "page": "30-Day Starter Kit",
+      "flagged": "90-Day 100% Money-Back Guarantee",
+      "match": "Money-Back",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 83
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — Natural Testosterone Support",
+      "page": "30-Day Starter Kit",
+      "flagged": "Try Risk-Free for 90 Days or 100% Money Back",
+      "match": "Risk-Free",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 84
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "30-Day Starter Kit",
+      "flagged": "Feel a Massive Difference in 90 Days Or Your Money Back",
+      "match": "Money Back",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 85
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "30-Day Starter Kit",
+      "flagged": "That’s why we want you to try Testosterone Support, risk-free for 90 days.",
+      "match": "risk-free",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 86
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "30-Day Starter Kit",
+      "flagged": "What is your 90-day higher-t guarantee?",
+      "match": "90-day higher-t guarantee",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 87
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "Promo — Apple Watch Giveaway",
+      "page": "Apple Watch Giveaway",
+      "flagged": "90 Day Higher T Guarantee",
+      "match": "90 Day Higher T Guarantee",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 88
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "Homepage — Homepage",
+      "page": "Homepage",
+      "flagged": "90 Day Higher T Guarantee",
+      "match": "90 Day Higher T Guarantee",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 89
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "Homepage — $0",
+      "page": "Homepage",
+      "flagged": "Higher T or your money back.",
+      "match": "money back",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 90
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "Reclaim your masculinity, risk-free.",
+      "match": "risk-free",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 91
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "That’s why we want you to try Testosterone Support, risk-free for 90 days.",
+      "match": "risk-free",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 92
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "Homepage — Boron",
+      "page": "Homepage",
+      "flagged": "What is your 90-Day Higher-T Guarantee?",
+      "match": "90-Day Higher-T Guarantee",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 93
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "Content — Prepare for Lift-Off",
+      "page": "Prepare for Lift-Off",
+      "flagged": "90 Day Higher T Guarantee",
+      "match": "90 Day Higher T Guarantee",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 94
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "Content — WHAT TO EXPECT",
+      "page": "Prepare for Lift-Off",
+      "flagged": "That’s why we want you to try Testosterone Support, risk-free for 90 days.",
+      "match": "risk-free",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 95
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "Content — WHAT TO EXPECT",
+      "page": "Prepare for Lift-Off",
+      "flagged": "What is your 90-day higher-t guarantee?",
+      "match": "90-day higher-t guarantee",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 96
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — Try Once",
+      "page": "Try Once",
+      "flagged": "90 Day Higher T Guarantee",
+      "match": "90 Day Higher T Guarantee",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 97
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — Natural Testosterone Support: Try Once",
+      "page": "Try Once",
+      "flagged": "90-Day 100% Money-Back Guarantee",
+      "match": "Money-Back",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 98
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — 90-Day Supply",
+      "page": "Try Once",
+      "flagged": "That’s why we want you to try Testosterone Support, risk-free for 90 days.",
+      "match": "risk-free",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 99
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "Try Once",
+      "flagged": "Feel a Massive Difference in 90 Days Or Your Money Back",
+      "match": "Money Back",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 100
+    },
+    {
+      "domain": "claims",
+      "ruleId": "guarantee-terms",
+      "regulation": "FTC — Guarantee / Risk-Free",
+      "severity": "low",
+      "priority": "P3",
+      "location": "PDP — Results From Day 1 to Week 3",
+      "page": "Try Once",
+      "flagged": "What is your 90-day higher-t guarantee?",
+      "match": "90-day higher-t guarantee",
+      "why": "\"Risk-free\" and guarantee claims must clearly and conspicuously disclose all material terms (what is refunded, deadlines, conditions). An undisclosed-terms guarantee is deceptive under FTC guidance.",
+      "suggest": "Link \"guarantee\"/\"risk-free\" to the full terms (refund window, what’s covered, how to claim) at the point of the claim.",
+      "id": 101
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/cbf15d5872d8445ab8fa04d275c9b813.thumbnail.0000000000_small.jpg?v=1774539686\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 102
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/cbf15d5872d8445ab8fa04d275c9b813.thumbnail.0000000000_1200x.jpg?v=1774539686\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 103
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/2367db7f746249239cc2e623a28b0396.thumbnail.0000000000_small.jpg?v=1774540272\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 104
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/2367db7f746249239cc2e623a28b0396.thumbnail.0000000000_1200x.jpg?v=1774540272\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 105
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/ae1bd73858914b7bbd259d53f3d84abe.thumbnail.0000000000_small.jpg?v=1774540321\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 106
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/ae1bd73858914b7bbd259d53f3d84abe.thumbnail.0000000000_1200x.jpg?v=1774540321\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 107
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/2002424e9de543859cccac33afec81fa.thumbnail.0000000000_small.jpg?v=1774540399\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 108
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/2002424e9de543859cccac33afec81fa.thumbnail.0000000000_1200x.jpg?v=1774540399\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 109
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "2.4.4 (A)",
+      "flagged": "<a href=\"/products/30-day-supply-starter-kit\">\n              <img src=\"//mengotomars.com/cdn/shop/files/MM_ProductImages_PDP_1x1__1.png?v=1774889089&amp;width=4…",
+      "why": "This link has no text and no aria-label, so its destination is not conveyed to screen-reader users.",
+      "suggest": "Add descriptive link text, or an aria-label if the link is icon-only.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 110
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "2.4.4 (A)",
+      "flagged": "<a\n    @click=\"$store.scroll.scrollTo('junipProductReviews9396598669609')\"\n    class=\"flex items-center gap-[8px] border-b-[#FF5600] border-b-2 cursor-pointer\"\n…",
+      "why": "This link has no text and no aria-label, so its destination is not conveyed to screen-reader users.",
+      "suggest": "Add descriptive link text, or an aria-label if the link is icon-only.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 111
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "2.4.4 (A)",
+      "flagged": "<a\n        @click=\"$store.scroll.scrollTo('junipProductReviews9396598669609')\"\n        class=\"flex items-center gap-[8px] cursor-pointer\"\n        x-cloak\n      …",
+      "why": "This link has no text and no aria-label, so its destination is not conveyed to screen-reader users.",
+      "suggest": "Add descriptive link text, or an aria-label if the link is icon-only.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 112
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button class=\"mini__cart-close\">\n          <svg\n            xmlns=\"http://www.w3.org/2000/svg\"\n            aria-hidden=\"true\"\n            focusable=\"false\"\n   …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 113
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button class=\"component-slider__prev component-slider__nav-manual top-0 absolute left-1/2 -translate-x-1/2 text-white [&.swiper-button-disabled]:text-Davys-Gra…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 114
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button class=\"component-slider__next component-slider__nav-manual bottom-0 absolute left-1/2 -translate-x-1/2 text-white [&.swiper-button-disabled]:text-Davys-…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 115
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n        class=\"component-slider__prev left-0 bg-gradient-to-r from-black w-1/4\n        h-full\n        opacity-10\n        absolute\n        top-0\n        …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 116
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n        class=\"component-slider__next right-0 bg-gradient-to-l from-black w-1/4\n        h-full\n        opacity-10\n        absolute\n        top-0\n       …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 117
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n        class=\"\n          component-slider__prev component-slider__nav-manual us:left-0 absolute -left-2.5 top-1/2 z-10\n          -translate-y-1/2 [&_sv…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 118
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n        class=\"\n          component-slider__next component-slider__nav-manual us:right-0 absolute -right-2.5 top-1/2 z-10\n          -translate-y-1/2 [&_…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 119
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n      class=\"absolute top-[20px] right-[20px] flex cursor-pointer\"\n      @click=\"$store.cart.quarterlyOfferPopupIsOpen = false\"\n    >\n      <svg\n       …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 120
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n                          type=\"button\"\n                          class=\"chat-bot__followup\"\n                          @click.stop=\"sendSuggested(questi…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 121
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "2.4.4 (A)",
+      "flagged": "<a href=\"/products/30-day-supply-starter-kit\">\n              <img src=\"//mengotomars.com/cdn/shop/files/MM_ProductImages_PDP_1x1__1.png?v=1774889089&amp;width=4…",
+      "why": "This link has no text and no aria-label, so its destination is not conveyed to screen-reader users.",
+      "suggest": "Add descriptive link text, or an aria-label if the link is icon-only.",
+      "location": "Promo — markup",
+      "page": "Apple Watch Giveaway",
+      "id": 122
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button class=\"mini__cart-close\">\n          <svg\n            xmlns=\"http://www.w3.org/2000/svg\"\n            aria-hidden=\"true\"\n            focusable=\"false\"\n   …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "Promo — markup",
+      "page": "Apple Watch Giveaway",
+      "id": 123
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n                          type=\"button\"\n                          class=\"chat-bot__followup\"\n                          @click.stop=\"sendSuggested(questi…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "Promo — markup",
+      "page": "Apple Watch Giveaway",
+      "id": 124
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/guarantee-banner-desktop-new.jpg?v=1777889844&amp;width=2560\" srcset=\"//mengotomars.com/cdn/shop/files/guarantee-bann…",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "Homepage — markup",
+      "page": "Homepage",
+      "id": 125
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/Mobile-90_Day_Higher_T.jpg?v=1781530884&amp;width=768\" srcset=\"//mengotomars.com/cdn/shop/files/Mobile-90_Day_Higher_…",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "Homepage — markup",
+      "page": "Homepage",
+      "id": 126
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/guarantee_cf7f74b4-9451-4a1a-9904-67f21d2a5d72.svg?v=1774022822&amp;width=200\" srcset=\"//mengotomars.com/cdn/shop/fil…",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "Homepage — markup",
+      "page": "Homepage",
+      "id": 127
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "2.4.4 (A)",
+      "flagged": "<a href=\"/products/30-day-supply-starter-kit\">\n              <img src=\"//mengotomars.com/cdn/shop/files/MM_ProductImages_PDP_1x1__1.png?v=1774889089&amp;width=4…",
+      "why": "This link has no text and no aria-label, so its destination is not conveyed to screen-reader users.",
+      "suggest": "Add descriptive link text, or an aria-label if the link is icon-only.",
+      "location": "Homepage — markup",
+      "page": "Homepage",
+      "id": 128
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button class=\"mini__cart-close\">\n          <svg\n            xmlns=\"http://www.w3.org/2000/svg\"\n            aria-hidden=\"true\"\n            focusable=\"false\"\n   …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "Homepage — markup",
+      "page": "Homepage",
+      "id": 129
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n                          type=\"button\"\n                          class=\"chat-bot__followup\"\n                          @click.stop=\"sendSuggested(questi…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "Homepage — markup",
+      "page": "Homepage",
+      "id": 130
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/7851ee9e758e4820bfb8e33474b3d416.thumbnail.0000000000_small.jpg?v=1774095512\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "Content — markup",
+      "page": "Prepare for Lift-Off",
+      "id": 131
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "2.4.4 (A)",
+      "flagged": "<a href=\"/products/30-day-supply-starter-kit\">\n              <img src=\"//mengotomars.com/cdn/shop/files/MM_ProductImages_PDP_1x1__1.png?v=1774889089&amp;width=4…",
+      "why": "This link has no text and no aria-label, so its destination is not conveyed to screen-reader users.",
+      "suggest": "Add descriptive link text, or an aria-label if the link is icon-only.",
+      "location": "Content — markup",
+      "page": "Prepare for Lift-Off",
+      "id": 132
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button class=\"mini__cart-close\">\n          <svg\n            xmlns=\"http://www.w3.org/2000/svg\"\n            aria-hidden=\"true\"\n            focusable=\"false\"\n   …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "Content — markup",
+      "page": "Prepare for Lift-Off",
+      "id": 133
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n                          type=\"button\"\n                          class=\"chat-bot__followup\"\n                          @click.stop=\"sendSuggested(questi…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "Content — markup",
+      "page": "Prepare for Lift-Off",
+      "id": 134
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/cbf15d5872d8445ab8fa04d275c9b813.thumbnail.0000000000_small.jpg?v=1774539686\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 135
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/cbf15d5872d8445ab8fa04d275c9b813.thumbnail.0000000000_1200x.jpg?v=1774539686\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 136
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/2367db7f746249239cc2e623a28b0396.thumbnail.0000000000_small.jpg?v=1774540272\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 137
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/2367db7f746249239cc2e623a28b0396.thumbnail.0000000000_1200x.jpg?v=1774540272\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 138
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/ae1bd73858914b7bbd259d53f3d84abe.thumbnail.0000000000_small.jpg?v=1774540321\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 139
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/ae1bd73858914b7bbd259d53f3d84abe.thumbnail.0000000000_1200x.jpg?v=1774540321\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 140
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/2002424e9de543859cccac33afec81fa.thumbnail.0000000000_small.jpg?v=1774540399\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 141
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "img-alt",
+      "regulation": "WCAG 1.1.1 — Non-text Content",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "1.1.1 (A)",
+      "flagged": "<img src=\"//mengotomars.com/cdn/shop/files/preview_images/2002424e9de543859cccac33afec81fa.thumbnail.0000000000_1200x.jpg?v=1774540399\">",
+      "why": "This <img> has no alt attribute. Screen-reader users get no description; decorative images need alt=\"\" to be skipped.",
+      "suggest": "Add alt text describing the image’s purpose, or alt=\"\" plus role=\"presentation\" if purely decorative.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 142
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "2.4.4 (A)",
+      "flagged": "<a href=\"/products/30-day-supply-starter-kit\">\n              <img src=\"//mengotomars.com/cdn/shop/files/MM_ProductImages_PDP_1x1__1.png?v=1774889089&amp;width=4…",
+      "why": "This link has no text and no aria-label, so its destination is not conveyed to screen-reader users.",
+      "suggest": "Add descriptive link text, or an aria-label if the link is icon-only.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 143
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "2.4.4 (A)",
+      "flagged": "<a\n    @click=\"$store.scroll.scrollTo('junipProductReviews9396598669609')\"\n    class=\"flex items-center gap-[8px] border-b-[#FF5600] border-b-2 cursor-pointer\"\n…",
+      "why": "This link has no text and no aria-label, so its destination is not conveyed to screen-reader users.",
+      "suggest": "Add descriptive link text, or an aria-label if the link is icon-only.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 144
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "2.4.4 (A)",
+      "flagged": "<a\n        @click=\"$store.scroll.scrollTo('junipProductReviews9396598669609')\"\n        class=\"flex items-center gap-[8px] cursor-pointer\"\n        x-cloak\n      …",
+      "why": "This link has no text and no aria-label, so its destination is not conveyed to screen-reader users.",
+      "suggest": "Add descriptive link text, or an aria-label if the link is icon-only.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 145
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button class=\"mini__cart-close\">\n          <svg\n            xmlns=\"http://www.w3.org/2000/svg\"\n            aria-hidden=\"true\"\n            focusable=\"false\"\n   …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 146
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button class=\"component-slider__prev component-slider__nav-manual top-0 absolute left-1/2 -translate-x-1/2 text-white [&.swiper-button-disabled]:text-Davys-Gra…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 147
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button class=\"component-slider__next component-slider__nav-manual bottom-0 absolute left-1/2 -translate-x-1/2 text-white [&.swiper-button-disabled]:text-Davys-…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 148
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n        class=\"component-slider__prev left-0 bg-gradient-to-r from-black w-1/4\n        h-full\n        opacity-10\n        absolute\n        top-0\n        …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 149
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n        class=\"component-slider__next right-0 bg-gradient-to-l from-black w-1/4\n        h-full\n        opacity-10\n        absolute\n        top-0\n       …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 150
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n        class=\"\n          component-slider__prev component-slider__nav-manual us:left-0 absolute -left-2.5 top-1/2 z-10\n          -translate-y-1/2 [&_sv…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 151
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n        class=\"\n          component-slider__next component-slider__nav-manual us:right-0 absolute -right-2.5 top-1/2 z-10\n          -translate-y-1/2 [&_…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 152
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n      class=\"absolute top-[20px] right-[20px] flex cursor-pointer\"\n      @click=\"$store.cart.quarterlyOfferPopupIsOpen = false\"\n    >\n      <svg\n       …",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 153
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "empty-button",
+      "regulation": "WCAG 4.1.2 — Name, Role, Value",
+      "severity": "high",
+      "priority": "P1",
+      "wcag": "4.1.2 (A)",
+      "flagged": "<button\n                          type=\"button\"\n                          class=\"chat-bot__followup\"\n                          @click.stop=\"sendSuggested(questi…",
+      "why": "This <button> has no text or accessible name, so assistive tech announces only \"button\" with no purpose.",
+      "suggest": "Add visible button text, or an aria-label for icon-only buttons.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 154
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a\n                      href=\"/products/30-day-supply-starter-kit\"\n                      class=\"block w-full pb-[17px] mb-[5px] border-b border-wh…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 155
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a href=\"/products/30-day-supply-starter-kit\" class=\"btn-black\"\n              >Shop Now\n              <svg\n                xmlns=\"http://www.w3.org…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 156
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a\n                      href=\"/products/30-day-supply-starter-kit\"\n                      class=\"block w-full pb-[17px] mb-[5px] border-b border-wh…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "Promo — markup",
+      "page": "Apple Watch Giveaway",
+      "id": 157
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a href=\"/products/30-day-supply-starter-kit\" class=\"btn-black\"\n              >Shop Now\n              <svg\n                xmlns=\"http://www.w3.org…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "Promo — markup",
+      "page": "Apple Watch Giveaway",
+      "id": 158
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a\n                      href=\"/products/30-day-supply-starter-kit\"\n                      class=\"block w-full pb-[17px] mb-[5px] border-b border-wh…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "Homepage — markup",
+      "page": "Homepage",
+      "id": 159
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a href=\"/products/30-day-supply-starter-kit\" class=\"btn-black\"\n              >Shop Now\n              <svg\n                xmlns=\"http://www.w3.org…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "Homepage — markup",
+      "page": "Homepage",
+      "id": 160
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a\n                      href=\"/products/30-day-supply-starter-kit\"\n                      class=\"block w-full pb-[17px] mb-[5px] border-b border-wh…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "Content — markup",
+      "page": "Prepare for Lift-Off",
+      "id": 161
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a href=\"/products/30-day-supply-starter-kit\" class=\"btn-black\"\n              >Shop Now\n              <svg\n                xmlns=\"http://www.w3.org…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "Content — markup",
+      "page": "Prepare for Lift-Off",
+      "id": 162
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a\n                      href=\"/products/30-day-supply-starter-kit\"\n                      class=\"block w-full pb-[17px] mb-[5px] border-b border-wh…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 163
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "generic-link",
+      "regulation": "WCAG 2.4.4 — Link Purpose",
+      "severity": "medium",
+      "priority": "P2",
+      "wcag": "2.4.4 (A)",
+      "flagged": "\"Shop Now\" — <a href=\"/products/30-day-supply-starter-kit\" class=\"btn-black\"\n              >Shop Now\n              <svg\n                xmlns=\"http://www.w3.org…",
+      "why": "Link text \"Shop Now\" does not describe its destination out of context; users navigating by link list cannot tell where it goes.",
+      "suggest": "Use link text that describes the target (e.g. \"Read the 90-day guarantee terms\").",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 164
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "heading-skip",
+      "regulation": "WCAG 1.3.1 — Info and Relationships",
+      "severity": "low",
+      "priority": "P3",
+      "wcag": "1.3.1 (A)",
+      "flagged": "Heading jumps from h1 to h4",
+      "why": "Heading levels skip from h1 to h4. A broken heading hierarchy makes the page outline confusing for screen-reader navigation.",
+      "suggest": "Use sequential heading levels; change the h4 to h2 or restructure.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 165
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "heading-skip",
+      "regulation": "WCAG 1.3.1 — Info and Relationships",
+      "severity": "low",
+      "priority": "P3",
+      "wcag": "1.3.1 (A)",
+      "flagged": "Heading jumps from h4 to h6",
+      "why": "Heading levels skip from h4 to h6. A broken heading hierarchy makes the page outline confusing for screen-reader navigation.",
+      "suggest": "Use sequential heading levels; change the h6 to h5 or restructure.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 166
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "heading-skip",
+      "regulation": "WCAG 1.3.1 — Info and Relationships",
+      "severity": "low",
+      "priority": "P3",
+      "wcag": "1.3.1 (A)",
+      "flagged": "Heading jumps from h2 to h4",
+      "why": "Heading levels skip from h2 to h4. A broken heading hierarchy makes the page outline confusing for screen-reader navigation.",
+      "suggest": "Use sequential heading levels; change the h4 to h3 or restructure.",
+      "location": "PDP — markup",
+      "page": "30-Day Starter Kit",
+      "id": 167
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "heading-skip",
+      "regulation": "WCAG 1.3.1 — Info and Relationships",
+      "severity": "low",
+      "priority": "P3",
+      "wcag": "1.3.1 (A)",
+      "flagged": "Heading jumps from h1 to h3",
+      "why": "Heading levels skip from h1 to h3. A broken heading hierarchy makes the page outline confusing for screen-reader navigation.",
+      "suggest": "Use sequential heading levels; change the h3 to h2 or restructure.",
+      "location": "Promo — markup",
+      "page": "Apple Watch Giveaway",
+      "id": 168
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "heading-skip",
+      "regulation": "WCAG 1.3.1 — Info and Relationships",
+      "severity": "low",
+      "priority": "P3",
+      "wcag": "1.3.1 (A)",
+      "flagged": "Heading jumps from h1 to h6",
+      "why": "Heading levels skip from h1 to h6. A broken heading hierarchy makes the page outline confusing for screen-reader navigation.",
+      "suggest": "Use sequential heading levels; change the h6 to h2 or restructure.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 169
+    },
+    {
+      "domain": "accessibility",
+      "ruleId": "heading-skip",
+      "regulation": "WCAG 1.3.1 — Info and Relationships",
+      "severity": "low",
+      "priority": "P3",
+      "wcag": "1.3.1 (A)",
+      "flagged": "Heading jumps from h2 to h4",
+      "why": "Heading levels skip from h2 to h4. A broken heading hierarchy makes the page outline confusing for screen-reader navigation.",
+      "suggest": "Use sequential heading levels; change the h4 to h3 or restructure.",
+      "location": "PDP — markup",
+      "page": "Try Once",
+      "id": 170
+    }
+  ]
+};
+let DATA = { meta: {}, findings: [] };
+let state = { domain: "all", sev: "all", q: "" };
+
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, c =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+function renderMeta() {
+  const m = DATA.meta || {};
+  const t = m.totals || {};
+  const el = document.getElementById("scanmeta");
+  const date = m.scannedAt ? m.scannedAt.slice(0, 10) : "—";
+  el.innerHTML =
+    `<span><b>site</b> ${esc(m.site || "")}</span>` +
+    `<span><b>scanned</b> ${esc(date)}</span>` +
+    `<span><b>pages</b> ${(m.pagesScanned || []).length}</span>` +
+    `<span><b>findings</b> ${t.all || 0}</span>`;
+
+  const claims = t.claims || 0, a11y = t.accessibility || 0, all = (claims + a11y) || 1;
+  document.getElementById("cards").innerHTML = `
+    <div class="stat"><div class="n">${t.all || 0}</div><div class="l">Total issues</div></div>
+    <div class="stat high"><div class="n">${t.high || 0}</div><div class="l">High severity</div></div>
+    <div class="stat medium"><div class="n">${t.medium || 0}</div><div class="l">Medium</div></div>
+    <div class="stat low"><div class="n">${t.low || 0}</div><div class="l">Low</div></div>
+    <div class="stat bar">
+      <div class="l">By domain</div>
+      <div class="split">
+        <i style="width:${claims / all * 100}%;background:var(--claims)"></i>
+        <i style="width:${a11y / all * 100}%;background:var(--a11y)"></i>
+      </div>
+      <div class="legend">
+        <span class="lc">Claims ${claims}</span>
+        <span class="la">Accessibility ${a11y}</span>
+      </div>
+    </div>`;
+}
+
+function matches(f) {
+  if (state.domain !== "all" && f.domain !== state.domain) return false;
+  if (state.sev !== "all" && f.severity !== state.sev) return false;
+  if (state.q) {
+    const hay = (f.flagged + " " + f.regulation + " " + f.page + " " + f.location + " " + (f.suggest||"")).toLowerCase();
+    if (!hay.includes(state.q.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function card(f) {
+  const title = f.domain === "claims"
+    ? `“${esc(f.flagged.length > 90 ? f.flagged.slice(0, 90) + "…" : f.flagged)}”`
+    : esc(f.regulation.split("—")[1] ? f.regulation.split("—")[1].trim() : f.regulation);
+  const wcag = f.wcag ? `<span>WCAG ${esc(f.wcag)}</span>` : "";
+  return `
+  <div class="issue ${f.severity}">
+    <div class="ihead">
+      <div class="idx">#${f.id}</div>
+      <h3 class="ititle">${title}</h3>
+    </div>
+    <div class="badges">
+      <span class="badge sev-${f.severity}">${SEV[f.severity]} severity</span>
+      <span class="badge reg">${esc(f.regulation)}</span>
+      <span class="badge loc">${esc(f.location)}</span>
+    </div>
+    <div class="body">
+      <div class="label">Flagged ${f.domain === "claims" ? "language" : "markup"}</div>
+      <div class="flagged">${esc(f.flagged)}</div>
+      <div class="label">Why it's a problem</div>
+      <div class="why">${esc(f.why)}</div>
+      <div class="label">Actionable fix</div>
+      <div class="fix">
+        <div class="col cur"><div class="h">✕ Current</div><div class="txt">${esc(f.flagged)}</div></div>
+        <div class="col sug"><div class="h">✓ Suggested</div><div class="txt">${esc(f.suggest)}</div></div>
+      </div>
+    </div>
+    <div class="footer">
+      <span class="prio">${esc(f.priority)}</span>
+      <span>${esc(f.page)}</span>
+      ${wcag}
+    </div>
+  </div>`;
+}
+
+function render() {
+  const list = DATA.findings.filter(matches);
+  document.getElementById("count").textContent = `${list.length} of ${DATA.findings.length}`;
+  document.getElementById("list").innerHTML = list.length
+    ? list.map(card).join("")
+    : `<div class="empty">No findings match these filters.</div>`;
+}
+
+function wireSeg(id, key) {
+  document.getElementById(id).addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    [...e.currentTarget.children].forEach(x => x.classList.remove("on"));
+    b.classList.add("on");
+    state[key] = b.dataset.d || b.dataset.s;
+    render();
+  });
+}
+wireSeg("domainSeg", "domain");
+wireSeg("sevSeg", "sev");
+document.getElementById("search").addEventListener("input", e => { state.q = e.target.value; render(); });
+
+function load() {
+  DATA = BAKED;
+  renderMeta();
+  render();
+}
+load();
+</script>
+
+</body>
+</html>

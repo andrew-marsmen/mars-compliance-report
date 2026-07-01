@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Mars Men · Compliance Bot</title>
+</head>
+<body>
+<meta charset="utf-8">
+<title>Mars Men · Compliance Bot</title>
+<style>
+  :root {
+    --bg: #0b0b0d; --surface: #141417; --surface-2: #1c1c21; --line: #2a2a31;
+    --text: #ECECEE; --muted: #9b9ba6; --faint: #6c6c78;
+    --orange: #FF5A1F; --orange-2: #ff7a45;
+    --red: #ff5a5a; --red-bg: #2a1414; --green: #54d18c; --green-bg: #122a1d;
+    --high: #ff5a5a; --medium: #ffb020; --low: #6c8cff;
+    --claims: #ff8a3d; --a11y: #4fb6ff;
+    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    --sans: "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans);
+    -webkit-font-smoothing: antialiased; line-height: 1.55; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 22px; }
+  a { color: var(--orange); }
+  h2 { font-size: 13px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint);
+    margin: 0 0 22px; font-weight: 700; }
+  section { padding: 46px 0; border-top: 1px solid var(--line); }
+  :focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+
+  /* Hero */
+  .hero { padding: 60px 0 30px; border: 0;
+    background: radial-gradient(120% 130% at 82% -30%, rgba(255,90,31,.20), transparent 55%); }
+  .eyebrow { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 700;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+  .hero h1 { font-size: clamp(32px, 5.5vw, 52px); line-height: 1.02; letter-spacing: -.03em;
+    margin: 16px 0 14px; text-wrap: balance; }
+  .hero h1 .o { color: var(--orange); }
+  .lede { font-size: 17px; color: var(--muted); max-width: 620px; margin: 0; }
+  .lede b { color: var(--text); font-weight: 600; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-top: 30px; }
+  .tab { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
+    font: 600 15px/1 var(--sans); padding: 14px 18px; cursor: pointer; margin-bottom: -1px; }
+  .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--orange); }
+  .tab:hover { color: var(--text); }
+  .panel { display: none; }
+  .panel.on { display: block; }
+
+  .cta { display: inline-flex; align-items: center; gap: 9px; background: var(--orange); color: #140b06;
+    font-weight: 700; font-size: 15px; text-decoration: none; padding: 13px 22px; border-radius: 10px; border: 0; cursor: pointer; }
+  .cta:hover { background: var(--orange-2); } .cta .arw { font-family: var(--mono); }
+
+  /* Metric strip */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 34px 0 6px; }
+  .metric { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .metric .n { font-family: var(--mono); font-size: 34px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .metric.hi .n { color: var(--high); }
+  .metric .l { color: var(--muted); font-size: 12px; margin-top: 9px; text-transform: uppercase; letter-spacing: .07em; }
+  .cta-note { color: var(--faint); font-size: 13px; margin-top: 18px; }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+  .step .k { font-family: var(--mono); color: var(--orange); font-size: 13px; font-weight: 700; }
+  .step h3 { margin: 12px 0 8px; font-size: 17px; letter-spacing: -.01em; }
+  .step p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  /* Checks */
+  .domains { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .domain { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .domain .top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .domain h3 { margin: 0; font-size: 18px; }
+  .domain .tot { font-family: var(--mono); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .domain.claims .tot { color: var(--claims); } .domain.a11y .tot { color: var(--a11y); }
+  .domain .sub { color: var(--faint); font-size: 13px; margin: 0 0 16px; }
+  .rule { display: flex; align-items: baseline; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+  .rule .rn { flex: 1; font-size: 13.5px; color: var(--text); }
+  .rule .rn small { display: block; color: var(--faint); font-size: 12px; margin-top: 2px; }
+  .rule .c { font-family: var(--mono); font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .dtag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
+  .domain.claims .dtag { background: rgba(255,138,61,.14); color: var(--claims); }
+  .domain.a11y .dtag { background: rgba(79,182,255,.14); color: var(--a11y); }
+
+  /* Examples + cards shared */
+  .ex { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; }
+  .ex.high { border-left-color: var(--high); } .ex.medium { border-left-color: var(--medium); }
+  .ex .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .badge { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .badge.h, .badge.sev-high { background: var(--red-bg); color: var(--high); border-color: transparent; }
+  .badge.m, .badge.sev-medium { background: #2a2410; color: var(--medium); border-color: transparent; }
+  .badge.sev-low { background: #161b2e; color: var(--low); border-color: transparent; }
+  .badge.reg { color: var(--orange); border-color: rgba(255,90,31,.35); }
+  .badge.pg, .badge.loc { color: var(--muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
+  .cmp, .fix { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cmp .box, .col { border-radius: 9px; padding: 11px 13px; font-size: 13px; word-break: break-word; }
+  .cmp .box { font-family: var(--mono); }
+  .cmp .cur, .col.cur { background: var(--red-bg); } .cmp .sug, .col.sug { background: var(--green-bg); }
+  .cmp .h, .col .h { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 6px; }
+  .cmp .cur .h, .col.cur .h { color: var(--high); } .cmp .sug .h, .col.sug .h { color: var(--green); }
+  .col .txt { color: var(--text); font-family: var(--mono); }
+
+  footer { border-top: 1px solid var(--line); padding: 30px 0 70px; color: var(--faint); font-size: 12.5px; line-height: 1.7; }
+  footer strong { color: var(--muted); } footer em { color: var(--muted); font-style: italic; }
+  .foot-cta { margin: 8px 0 26px; }
+
+  /* Review tab */
+  .rev-intro { color: var(--muted); font-size: 15px; margin: 30px 0 18px; max-width: 640px; }
+  form.scan { display: flex; gap: 10px; margin: 0 0 12px; flex-wrap: wrap; }
+  .scan input { flex: 1; min-width: 240px; background: var(--surface); border: 1px solid var(--line); color: var(--text);
+    border-radius: 10px; padding: 13px 16px; font-size: 15px; font-family: var(--sans); }
+  .scan input::placeholder { color: var(--faint); }
+  .scan button { background: var(--orange); color: #140b06; font-weight: 700; font-size: 15px; border: 0; border-radius: 10px; padding: 13px 24px; cursor: pointer; }
+  .scan button:hover:not(:disabled) { background: var(--orange-2); }
+  .scan button:disabled { opacity: .55; cursor: progress; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--faint); font-size: 13px; }
+  .chip { background: var(--surface); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 4px 12px; font-size: 12.5px; cursor: pointer; font-family: var(--mono); }
+  .chip:hover { border-color: var(--orange); color: var(--text); }
+  .status { margin: 22px 0; font-size: 14px; color: var(--muted); display: none; }
+  .status.show { display: block; } .status.err { color: var(--red); }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--line); border-top-color: var(--orange);
+    border-radius: 50%; vertical-align: -2px; margin-right: 8px; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+  .scanned { font-family: var(--mono); font-size: 12.5px; color: var(--faint); margin: 6px 0 16px; word-break: break-all; }
+  .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 8px 0 4px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 15px 16px; }
+  .stat .n { font-size: 26px; font-weight: 700; line-height: 1; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .stat .l { color: var(--muted); font-size: 11.5px; margin-top: 7px; text-transform: uppercase; letter-spacing: .07em; }
+  .stat.high .n { color: var(--high); } .stat.medium .n { color: var(--medium); } .stat.low .n { color: var(--low); }
+  .rtoolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 22px 0 16px; }
+  .seg { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+  .seg button { background: none; border: 0; color: var(--muted); padding: 7px 13px; border-radius: 7px; font-size: 13px; cursor: pointer; font-family: var(--sans); font-weight: 600; }
+  .seg button.on { background: var(--surface-2); color: var(--text); }
+  .exportbtn { background: var(--surface); border: 1px solid var(--line); color: var(--text); border-radius: 9px;
+    padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--sans); }
+  .exportbtn:hover { border-color: var(--orange); }
+  .count { color: var(--faint); font-size: 13px; font-family: var(--mono); margin-left: auto; }
+  .issue { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; margin-bottom: 16px; border-left: 3px solid var(--line); }
+  .issue.high { border-left-color: var(--high); } .issue.medium { border-left-color: var(--medium); } .issue.low { border-left-color: var(--low); }
+  .ihead { display: flex; gap: 12px; align-items: flex-start; }
+  .idx { font-family: var(--mono); color: var(--faint); font-size: 13px; padding-top: 2px; min-width: 28px; }
+  .ititle { font-size: 16px; font-weight: 600; margin: 0 0 8px; flex: 1; letter-spacing: -.01em; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; padding-left: 40px; }
+  .rbody { padding-left: 40px; }
+  .label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin: 16px 0 7px; }
+  .flagged { font-family: var(--mono); font-size: 13.5px; background: var(--red-bg); border-left: 3px solid var(--red);
+    border-radius: 0 8px 8px 0; padding: 11px 14px; color: #ffd7d7; white-space: pre-wrap; word-break: break-word; }
+  .why { color: var(--muted); font-size: 14px; }
+  .rfooter { display: flex; align-items: center; gap: 12px; padding-left: 40px; margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; font-size: 12px; color: var(--faint); }
+  .prio { font-family: var(--mono); font-weight: 700; color: var(--orange); }
+  .clean { text-align: center; color: var(--green); padding: 40px 0; font-size: 15px; }
+  .empty { text-align: center; color: var(--faint); padding: 40px 0; }
+  .note { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; color: var(--muted); font-size: 14px; line-height: 1.65; }
+  .note code { font-family: var(--mono); font-size: 13px; color: var(--text); background: var(--surface-2); padding: 2px 6px; border-radius: 5px; }
+
+  @media (max-width: 720px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .steps, .domains, .cmp, .fix { grid-template-columns: 1fr; }
+    .badges, .rbody, .rfooter { padding-left: 0; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow"><span class="dot"></span> Mars Men · Compliance Bot</div>
+    <h1>Scan. Fix. <span class="o">Stay compliant.</span></h1>
+    <p class="lede">An automated bot that scans supplement landing pages for the two things a brand
+      actually gets sued over — <b>FTC/FDA marketing claims</b> and <b>WCAG accessibility</b> — and
+      hands back a compliant rewrite for every issue it finds.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Compliance Bot">
+    <button class="tab" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" id="tab-review" aria-controls="panel-review" aria-selected="false">Review a URL</button>
+  </div>
+
+  <!-- ===================== OVERVIEW TAB ===================== -->
+  <div class="panel on" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="metrics">
+      <div class="metric"><div class="n">170</div><div class="l">Issues found</div></div>
+      <div class="metric hi"><div class="n">84</div><div class="l">High severity</div></div>
+      <div class="metric"><div class="n">5</div><div class="l">Pages scanned</div></div>
+      <div class="metric"><div class="n">2</div><div class="l">Compliance domains</div></div>
+    </div>
+    <a class="cta" style="margin-top:22px" href="./findings.html">
+      Open the full findings dashboard <span class="arw">→</span></a>
+    <div class="cta-note">The scan of the live Mars Men store, filterable by domain, severity, and page.</div>
+
+    <section>
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step"><div class="k">01 — Scan</div><h3>Crawl the live store</h3>
+          <p>Fetches the homepage, product pages, and promos straight from the URL — no plugin, no tag, nothing to install on the site.</p></div>
+        <div class="step"><div class="k">02 — Flag</div><h3>Run two rule engines</h3>
+          <p>Every line of copy is checked against an FTC/FDA claims lexicon; the markup is checked against WCAG 2.2. Each hit is tagged with its regulation, severity, and priority.</p></div>
+        <div class="step"><div class="k">03 — Fix</div><h3>Hand back the rewrite</h3>
+          <p>Each finding shows the flagged text, <em>why</em> it's a risk, and a ready-to-paste <b>Current → Suggested</b> fix — so the team can action it, not just read about it.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>What it checks</h2>
+      <div class="domains">
+        <div class="domain claims">
+          <div class="top"><h3><span class="dtag">Claims</span></h3><span class="tot">101 findings</span></div>
+          <p class="sub">FTC &amp; FDA marketing-claims rules for dietary supplements.</p>
+          <div class="rule"><span class="rn">Guarantee / risk-free terms <small>FTC — material terms must be disclosed</small></span><span class="c">20</span></div>
+          <div class="rule"><span class="rn">Absolute / permanent change <small>"optimized", "your new normal"</small></span><span class="c">17</span></div>
+          <div class="rule"><span class="rn">Sweepstakes / promotions <small>giveaway official-rules requirements</small></span><span class="c">15</span></div>
+          <div class="rule"><span class="rn">Disease-claim framing <small>FDA — fertility, low-T "epidemic"</small></span><span class="c">10</span></div>
+          <div class="rule"><span class="rn">Drug-like mechanism <small>FDA — "blocks", "feeds", "forces production"</small></span><span class="c">8</span></div>
+          <div class="rule"><span class="rn">Specific / quantified results <small>"+300 points", biomarker figures</small></span><span class="c">6</span></div>
+          <div class="rule"><span class="rn">Superlative / comparative <small>"most potent … on earth"</small></span><span class="c">6</span></div>
+          <div class="rule"><span class="rn">Testimonials / typicality <small>FTC — "most men experienced…"</small></span><span class="c">6</span></div>
+          <div class="rule"><span class="rn">Implied clinical efficacy <small>"clinically dosed", "clinical research shows"</small></span><span class="c">6</span></div>
+          <div class="rule"><span class="rn">Disclaimer placement <small>21 CFR 101.93(d) — footer-only is insufficient</small></span><span class="c">4</span></div>
+          <div class="rule"><span class="rn">Negative option / auto-renewal <small>ROSCA + CA — subscribe &amp; save</small></span><span class="c">3</span></div>
+        </div>
+        <div class="domain a11y">
+          <div class="top"><h3><span class="dtag">Accessibility</span></h3><span class="tot">69 findings</span></div>
+          <p class="sub">WCAG 2.2 / ADA structural checks — the violations that drive access lawsuits.</p>
+          <div class="rule"><span class="rn">Controls with no accessible name <small>WCAG 4.1.2 — empty buttons</small></span><span class="c">24</span></div>
+          <div class="rule"><span class="rn">Images missing alt text <small>WCAG 1.1.1 — non-text content</small></span><span class="c">20</span></div>
+          <div class="rule"><span class="rn">Non-descriptive link text <small>WCAG 2.4.4 — "shop now", "learn more"</small></span><span class="c">10</span></div>
+          <div class="rule"><span class="rn">Links with no text <small>WCAG 2.4.4 — link purpose</small></span><span class="c">9</span></div>
+          <div class="rule"><span class="rn">Skipped heading levels <small>WCAG 1.3.1 — broken outline</small></span><span class="c">6</span></div>
+          <div class="rule"><span class="rn">Also checks <small>page language, page title, form labels, positive tabindex</small></span><span class="c">✓</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>See it in action</h2>
+      <div class="ex high">
+        <div class="meta"><span class="badge h">High</span><span class="badge reg">FDA — Drug-like Mechanism</span><span class="badge pg">30-Day Starter Kit</span></div>
+        <div class="cmp">
+          <div class="box cur"><div class="h">✕ Current</div>Tongkat Ali blocks stress hormones</div>
+          <div class="box sug"><div class="h">✓ Suggested</div>studied for its role in supporting a healthy stress response</div>
+        </div>
+      </div>
+      <div class="ex high">
+        <div class="meta"><span class="badge h">High</span><span class="badge reg">21 CFR 101.93(d) — Disclaimer Placement</span><span class="badge pg">30-Day Starter Kit</span></div>
+        <div class="cmp">
+          <div class="box cur"><div class="h">✕ Current</div>Disclaimer appears only near the page end (≈99% down) while 74 structure/function claim sections run throughout.</div>
+          <div class="box sug"><div class="h">✓ Suggested</div>Add a disclaimer block after each claims section (hero, ingredient grid, timeline, testimonials) with an asterisk linking each claim to it. Keep the footer one too.</div>
+        </div>
+      </div>
+      <div class="ex high">
+        <div class="meta"><span class="badge h">High</span><span class="badge reg">FTC — Negative Option / Auto-Renewal</span><span class="badge pg">30-Day Starter Kit</span></div>
+        <div class="cmp">
+          <div class="box cur"><div class="h">✕ Current</div>SUBSCRIBE &amp; SAVE 50% OFF</div>
+          <div class="box sug"><div class="h">✓ Suggested</div>Disclose the recurring charge amount, frequency, and how to cancel — clearly, before payment, next to the subscribe action.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <a class="cta foot-cta" href="./findings.html">
+        Open the full findings dashboard <span class="arw">→</span></a>
+      <div>Scanned mengotomars.com — Homepage, 30-Day Starter Kit, Try Once, Prepare for Lift-Off, and the Apple Watch Giveaway.
+        The bot flags <em>likely</em> issues to triage fast; it is <strong>not legal advice</strong>. High-severity claims
+        should be reviewed by counsel, and any retained claim needs competent and reliable scientific evidence on file.</div>
+    </footer>
+  </div>
+
+  <!-- ===================== REVIEW TAB ===================== -->
+  <div class="panel" id="panel-review" role="tabpanel" aria-labelledby="tab-review">
+    <p class="rev-intro">Paste any public landing-page URL. The bot fetches it, runs the same FTC/FDA
+      and WCAG checks, and returns a suggested fix for each issue — which you can export.</p>
+    <form class="scan" id="form">
+      <input id="url" type="url" placeholder="https://example.com/landing-page" autocomplete="off" aria-label="Landing page URL to scan" required />
+      <button type="submit" id="go">Scan page</button>
+    </form>
+    <div class="chips">Try:
+      <button class="chip" type="button" data-u="https://mengotomars.com/">mengotomars.com</button>
+      <button class="chip" type="button" data-u="https://mengotomars.com/products/30-day-supply-starter-kit">30-day starter kit</button>
+    </div>
+    <div class="status" id="status"></div>
+    <div id="results"></div>
+  </div>
+</div>
+
+<script>
+const SEV = { high: "High", medium: "Medium", low: "Low" };
+let RESULT = null;
+let rstate = { domain: "all", sev: "all" };
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+/* ---- tabs ---- */
+const tabs = [...document.querySelectorAll('.tab')];
+function selectTab(id) {
+  tabs.forEach(t => {
+    const on = t.id === id;
+    t.setAttribute('aria-selected', on);
+    document.getElementById(t.getAttribute('aria-controls')).classList.toggle('on', on);
+  });
+  if (id === 'tab-review') document.getElementById('url').focus();
+}
+tabs.forEach(t => t.addEventListener('click', () => selectTab(t.id)));
+
+/* ---- review rendering ---- */
+function card(f) {
+  const title = f.domain === "claims"
+    ? `“${esc(f.flagged.length > 90 ? f.flagged.slice(0, 90) + "…" : f.flagged)}”`
+    : esc(f.regulation.split("—")[1] ? f.regulation.split("—")[1].trim() : f.regulation);
+  const wcag = f.wcag ? `<span>WCAG ${esc(f.wcag)}</span>` : "";
+  return `
+  <div class="issue ${f.severity}">
+    <div class="ihead"><div class="idx">#${f.id}</div><h3 class="ititle">${title}</h3></div>
+    <div class="badges">
+      <span class="badge sev-${f.severity}">${SEV[f.severity]} severity</span>
+      <span class="badge reg">${esc(f.regulation)}</span>
+      <span class="badge loc">${esc(f.location)}</span>
+    </div>
+    <div class="rbody">
+      <div class="label">Flagged ${f.domain === "claims" ? "language" : "markup"}</div>
+      <div class="flagged">${esc(f.flagged)}</div>
+      <div class="label">Why it's a problem</div>
+      <div class="why">${esc(f.why)}</div>
+      <div class="label">Actionable fix</div>
+      <div class="fix">
+        <div class="col cur"><div class="h">✕ Current</div><div class="txt">${esc(f.flagged)}</div></div>
+        <div class="col sug"><div class="h">✓ Suggested</div><div class="txt">${esc(f.suggest)}</div></div>
+      </div>
+    </div>
+    <div class="rfooter"><span class="prio">${esc(f.priority)}</span>${wcag}</div>
+  </div>`;
+}
+function disclaimerHTML() {
+  return `<div style="margin-top:26px;padding-top:16px;border-top:1px solid var(--line);color:var(--faint);font-size:12.5px;line-height:1.7;max-width:720px">
+    The bot flags <em style="color:var(--muted);font-style:italic">likely</em> issues to triage fast; it is
+    <strong style="color:var(--muted)">not legal advice</strong>. High-severity claims should be reviewed by counsel.</div>`;
+}
+function render() {
+  if (!RESULT) return;
+  const { meta, findings } = RESULT, t = meta.totals, results = document.getElementById("results");
+  if (!findings.length) {
+    results.innerHTML = `<div class="scanned">Scanned ${esc(meta.site)}</div><div class="clean">✓ No compliance issues detected on this page.</div>${disclaimerHTML()}`;
+    return;
+  }
+  const list = findings.filter(f => (rstate.domain === "all" || f.domain === rstate.domain) && (rstate.sev === "all" || f.severity === rstate.sev));
+  results.innerHTML = `
+    <div class="scanned">Scanned ${esc(meta.site)}</div>
+    <div class="statgrid">
+      <div class="stat"><div class="n">${t.all}</div><div class="l">Issues</div></div>
+      <div class="stat high"><div class="n">${t.high}</div><div class="l">High</div></div>
+      <div class="stat medium"><div class="n">${t.medium}</div><div class="l">Medium</div></div>
+      <div class="stat low"><div class="n">${t.low}</div><div class="l">Low</div></div>
+      <div class="stat"><div class="n">${t.claims}</div><div class="l">Claims</div></div>
+      <div class="stat"><div class="n">${t.accessibility}</div><div class="l">A11y</div></div>
+    </div>
+    <div class="rtoolbar">
+      <div class="seg" id="domainSeg">
+        <button data-d="all" class="on">All</button><button data-d="claims">Claims</button><button data-d="accessibility">Accessibility</button>
+      </div>
+      <div class="seg" id="sevSeg">
+        <button data-s="all" class="on">All severity</button><button data-s="high">High</button><button data-s="medium">Medium</button><button data-s="low">Low</button>
+      </div>
+      <button class="exportbtn" id="copyMd">Copy report</button>
+      <button class="exportbtn" id="dlJson">Download JSON</button>
+      <span class="count">${list.length} of ${findings.length}</span>
+    </div>
+    <div id="list">${list.length ? list.map(card).join("") : `<div class="empty">No findings match these filters.</div>`}</div>
+    ${disclaimerHTML()}`;
+  wireSeg("domainSeg", "domain"); wireSeg("sevSeg", "sev");
+  document.getElementById("copyMd").addEventListener("click", copyMarkdown);
+  document.getElementById("dlJson").addEventListener("click", downloadJson);
+}
+function wireSeg(id, key) {
+  const seg = document.getElementById(id); if (!seg) return;
+  seg.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    [...seg.children].forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); rstate[key] = b.dataset.d || b.dataset.s; render();
+  });
+}
+
+/* ---- export ---- */
+function slug(s) { return String(s).replace(/^https?:\/\//, "").replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").slice(0, 60) || "scan"; }
+function toMarkdown() {
+  const { meta, findings } = RESULT, t = meta.totals;
+  const lines = [
+    `# Compliance report — ${meta.site}`,
+    `_Scanned ${meta.scannedAt ? meta.scannedAt.slice(0,10) : ""} · ${t.all} findings (${t.claims} claims, ${t.accessibility} accessibility) · ${t.high} high, ${t.medium} medium, ${t.low} low_`,
+    ``,
+  ];
+  for (const f of findings) {
+    lines.push(`## #${f.id} · ${SEV[f.severity]} · ${f.regulation}`);
+    lines.push(`- **Location:** ${f.location}`);
+    lines.push(`- **Flagged:** ${f.flagged}`);
+    lines.push(`- **Why:** ${f.why}`);
+    lines.push(`- **Suggested fix:** ${f.suggest}`);
+    lines.push(`- **Priority:** ${f.priority}${f.wcag ? ` · WCAG ${f.wcag}` : ""}`);
+    lines.push(``);
+  }
+  lines.push(`---`, `_Generated by the Mars Men Compliance Bot. Flags likely issues to triage — not legal advice._`);
+  return lines.join("\n");
+}
+async function copyMarkdown() {
+  const btn = document.getElementById("copyMd"), md = toMarkdown();
+  try { await navigator.clipboard.writeText(md); btn.textContent = "Copied ✓"; }
+  catch { const ta = document.createElement("textarea"); ta.value = md; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); btn.textContent = "Copied ✓"; }
+  setTimeout(() => (btn.textContent = "Copy report"), 1600);
+}
+function downloadJson() {
+  const blob = new Blob([JSON.stringify(RESULT, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `compliance-${slug(RESULT.meta.site)}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+}
+
+/* ---- scanning ---- */
+const statusEl = document.getElementById("status");
+function status(msg, isErr) { statusEl.className = "status show" + (isErr ? " err" : ""); statusEl.innerHTML = isErr ? msg : `<span class="spinner"></span>${esc(msg)}`; }
+function clearStatus() { statusEl.className = "status"; statusEl.textContent = ""; }
+async function scan(url) {
+  rstate = { domain: "all", sev: "all" }; RESULT = null;
+  document.getElementById("results").innerHTML = ""; document.getElementById("go").disabled = true;
+  status(`Fetching and scanning ${url} …`);
+  try {
+    const r = await fetch("/api/scan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+    const data = await r.json();
+    if (!r.ok) { status(esc(data.error || `Scan failed (HTTP ${r.status}).`), true); return; }
+    RESULT = data; clearStatus(); render();
+  } catch (e) {
+    status(`Live scanning runs from the local app. Start it with <code style="font-family:var(--mono)">node scan/server.mjs</code> and open <code style="font-family:var(--mono)">http://localhost:4182</code>, then scan from there.`, true);
+  } finally { document.getElementById("go").disabled = false; }
+}
+document.getElementById("form").addEventListener("submit", e => { e.preventDefault(); const url = document.getElementById("url").value.trim(); if (url) scan(url); });
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { document.getElementById("url").value = c.dataset.u; scan(c.dataset.u); }));
+
+/* deep-link: #review opens the reviewer tab */
+if (location.hash === "#review") selectTab("tab-review");
+</script>
+
+</body>
+</html>
