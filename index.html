@@ -159,6 +159,30 @@
   .note { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; color: var(--muted); font-size: 14px; line-height: 1.65; }
   .note code { font-family: var(--mono); font-size: 13px; color: var(--text); background: var(--surface-2); padding: 2px 6px; border-radius: 5px; }
 
+  /* Compare matrix */
+  .callouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 0 0 22px; }
+  .callout { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--orange); border-radius: 12px; padding: 15px 17px; }
+  .callout .t { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .callout .v { font-size: 15px; font-weight: 600; line-height: 1.4; }
+  .callout .v b { color: var(--orange); }
+  .mtxwrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+  table.mtx { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 640px; }
+  table.mtx th, table.mtx td { padding: 11px 13px; text-align: center; border-bottom: 1px solid var(--line); }
+  table.mtx thead th { background: var(--surface-2); font-weight: 600; position: sticky; top: 0; }
+  table.mtx th.rowlabel, table.mtx td.rowlabel { text-align: left; color: var(--text); white-space: nowrap; }
+  table.mtx td.rowlabel small { display: block; color: var(--faint); font-weight: 400; font-size: 11.5px; }
+  table.mtx col.self, table.mtx th.self, table.mtx td.self { background: rgba(255,90,31,.07); }
+  table.mtx th.self { color: var(--orange); }
+  table.mtx td .cell { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700;
+    display: inline-flex; min-width: 30px; justify-content: center; padding: 3px 8px; border-radius: 7px; }
+  .brandurl { display: block; font-size: 11px; color: var(--faint); font-weight: 400; font-family: var(--mono); margin-top: 2px; }
+  .pill { font-size: 11px; font-weight: 700; letter-spacing: .04em; padding: 3px 9px; border-radius: 999px; text-transform: uppercase; }
+  .pill.ok { background: var(--green-bg); color: var(--green); }
+  .pill.warn { background: #2a2410; color: var(--medium); }
+  .pill.bad { background: var(--red-bg); color: var(--high); }
+  .pill.na { background: var(--surface-2); color: var(--faint); }
+  .cmpscope { color: var(--faint); font-size: 12.5px; margin-top: 16px; line-height: 1.6; }
+
   @media (max-width: 720px) {
     .metrics { grid-template-columns: repeat(2, 1fr); }
     .steps, .domains, .cmp, .fix { grid-template-columns: 1fr; }
@@ -178,6 +202,7 @@
   <div class="tabs" role="tablist" aria-label="Compliance Bot">
     <button class="tab" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">Overview</button>
     <button class="tab" role="tab" id="tab-review" aria-controls="panel-review" aria-selected="false">Review a URL</button>
+    <button class="tab" role="tab" id="tab-compare" aria-controls="panel-compare" aria-selected="false">Compare brands</button>
   </div>
 
   <!-- ===================== OVERVIEW TAB ===================== -->
@@ -284,6 +309,13 @@
     <div class="status" id="status"></div>
     <div id="results"></div>
   </div>
+
+  <!-- ===================== COMPARE TAB ===================== -->
+  <div class="panel" id="panel-compare" role="tabpanel" aria-labelledby="tab-compare">
+    <p class="rev-intro">How Mars Men's key compliance callouts stack up against peer supplement
+      brands — same rules, run on each brand's homepage. Higher = more flagged claims.</p>
+    <div id="compareRoot"></div>
+  </div>
 </div>
 
 <script>
@@ -291,6 +323,65 @@ const SEV = { high: "High", medium: "Medium", low: "Low" };
 let RESULT = null;
 let rstate = { domain: "all", sev: "all" };
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+/* ---- compare matrix ---- */
+const COMPARE = /*__COMPARE__*/{"scope":"Homepage scan, one page per brand — indicative, not a full-site audit.","categories":[{"key":"disease","label":"Disease / drug-like claims"},{"key":"efficacy","label":"Efficacy & clinical claims"},{"key":"superlative","label":"Superlatives & absolutes"},{"key":"guarantee","label":"Guarantee / risk-free terms"},{"key":"subscription","label":"Auto-renewal disclosure"},{"key":"accessibility","label":"Accessibility (WCAG)"}],"brands":[{"name":"Mars Men","url":"https://mengotomars.com/","self":true,"ok":true,"bytes":558909,"counts":{"disease":6,"efficacy":4,"superlative":5,"guarantee":5,"subscription":0,"accessibility":8},"examples":{"disease":"Boosts testosterone, enhances libido, improves fertility & supports muscle growth","efficacy":"Within the first week, most men experienced out of this world increases in energy, improved sleep quality, and heightened mental focus...","superlative":"MARS MEN The Most Potent","guarantee":"90 Day Higher T Guarantee"},"disclaimer":"footer-only","high":14,"claims":21,"accessibility":8,"fragments":144},{"name":"IM8","url":"https://im8health.com/","ok":true,"bytes":815648,"counts":{"disease":3,"efficacy":6,"superlative":7,"guarantee":5,"subscription":3,"accessibility":33},"examples":{"disease":"I joined IM8 to inspire others and contribute to life-changing products that support the body's ability to heal and thrive.\"","efficacy":"2x MVP & 10x NBA ALL-STAR","superlative":"“After decades at NASA studying the effects of space on the human body, I saw an opportunity with IM8 to apply that knowledge here on Earth.","guarantee":"30-day Money Back Guarantee","subscription":"Cancel anytime"},"disclaimer":"footer-only","high":33,"claims":25,"accessibility":33,"fragments":396},{"name":"Gruns","url":"https://gruns.co/","ok":true,"bytes":1420364,"counts":{"disease":1,"efficacy":2,"superlative":0,"guarantee":5,"subscription":5,"accessibility":75},"examples":{"disease":"Tastes like a treat, works like a supplement.","efficacy":"Clinically tested for nutrient absorption","guarantee":"📦 FREE SHIPPING + 30-DAY GUARANTEE 🔒","subscription":"Cancel anytime"},"disclaimer":"present","high":73,"claims":13,"accessibility":75,"fragments":191},{"name":"Ritual","url":"https://ritual.com/","ok":true,"bytes":390012,"counts":{"disease":0,"efficacy":0,"superlative":0,"guarantee":0,"subscription":0,"accessibility":48},"examples":{},"disclaimer":"n/a","high":38,"claims":0,"accessibility":48,"fragments":51},{"name":"Transparent Labs","url":"https://transparentlabs.com/","ok":true,"bytes":861168,"counts":{"disease":0,"efficacy":8,"superlative":6,"guarantee":0,"subscription":1,"accessibility":35},"examples":{"efficacy":"Clinically dosed phosphatidic acid for muscle growth and strength gains.","superlative":"If you recently picked up a tub of Transparent Labs Creatine HMB, you might be wondering when the best time is to take creatine.","subscription":"Subscribe & Save"},"disclaimer":"footer-only","high":20,"claims":16,"accessibility":35,"fragments":232}],"builtAt":"2026-07-01T17:52:04.035Z"}/*__END__*/;
+const DISC = {
+  present: ["ok", "Present"], "footer-only": ["warn", "Footer only"], missing: ["bad", "Missing"], "n/a": ["na", "n/a"],
+};
+function renderCompare() {
+  const root = document.getElementById("compareRoot");
+  if (!root) return;
+  if (!COMPARE || !COMPARE.brands || !COMPARE.brands.some(b => b.ok)) {
+    root.innerHTML = `<div class="note">Comparison data not built yet. Run <code>node scan/build-compare.mjs</code>.</div>`;
+    return;
+  }
+  const cats = COMPARE.categories, ok = COMPARE.brands.filter(b => b.ok);
+  const self = ok.find(b => b.self);
+
+  // "Where Mars Men stands out" — claim categories where Mars Men is the highest.
+  const callouts = [];
+  if (self) {
+    for (const c of cats) {
+      if (c.key === "accessibility") continue;
+      const sv = self.counts[c.key] || 0;
+      const peers = ok.filter(b => !b.self).map(b => b.counts[c.key] || 0);
+      const peerHi = Math.max(...peers);
+      if (sv > 0 && sv > peerHi) { // strictly more than every peer
+        callouts.push({ label: c.label, sv, lo: Math.min(...peers), hi: peerHi });
+      }
+    }
+    callouts.sort((a, b) => (b.sv - b.hi) - (a.sv - a.hi));
+  }
+  const calloutHTML = callouts.length ? `<div class="callouts">${callouts.slice(0, 3).map(c =>
+    `<div class="callout"><div class="t">${esc(c.label)}</div>
+      <div class="v">Mars Men leads: <b>${c.sv}</b> <span style="color:var(--faint)">vs peers ${c.lo}–${c.hi}</span></div></div>`).join("")}</div>` : "";
+
+  const shade = (v, max) => !v ? "color:var(--faint)" : `background:rgba(255,90,31,${(0.12 + (max ? v / max : 0) * 0.42).toFixed(2)});color:var(--text)`;
+  const head = `<tr><th class="rowlabel">Key callout</th>${ok.map(b =>
+    `<th class="${b.self ? "self" : ""}">${esc(b.name)}<span class="brandurl">${esc(b.url.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</span></th>`).join("")}</tr>`;
+
+  const rows = cats.map(c => {
+    const vals = ok.map(b => b.counts[c.key] || 0), max = Math.max(...vals);
+    return `<tr><td class="rowlabel">${esc(c.label)}</td>${ok.map(b =>
+      `<td class="${b.self ? "self" : ""}"><span class="cell" style="${shade(b.counts[c.key] || 0, max)}">${b.counts[c.key] || 0}</span></td>`).join("")}</tr>`;
+  }).join("");
+
+  const hiVals = ok.map(b => b.high || 0), hiMax = Math.max(...hiVals);
+  const hiRow = `<tr><td class="rowlabel">High-severity claims <small>most serious exposure</small></td>${ok.map(b =>
+    `<td class="${b.self ? "self" : ""}"><span class="cell" style="${shade(b.high || 0, hiMax)}">${b.high || 0}</span></td>`).join("")}</tr>`;
+  const discRow = `<tr><td class="rowlabel">FDA / DSHEA disclaimer <small>placement on the page</small></td>${ok.map(b => {
+    const [cls, lbl] = DISC[b.disclaimer] || DISC["n/a"];
+    return `<td class="${b.self ? "self" : ""}"><span class="pill ${cls}">${lbl}</span></td>`;
+  }).join("")}</tr>`;
+
+  root.innerHTML = `${calloutHTML}
+    <div class="mtxwrap"><table class="mtx">
+      <thead>${head}</thead>
+      <tbody>${rows}${hiRow}${discRow}</tbody>
+    </table></div>
+    <p class="cmpscope">${esc(COMPARE.scope)} Counts are flagged <em style="color:var(--muted)">candidate</em> claims per brand, not verified violations — some peers render copy via JavaScript that a static scan won't see (e.g. a low count can mean light server-side text, not clean copy).</p>`;
+}
 
 /* ---- tabs ---- */
 const tabs = [...document.querySelectorAll('.tab')];
@@ -435,8 +526,12 @@ async function scan(url) {
 document.getElementById("form").addEventListener("submit", e => { e.preventDefault(); const url = document.getElementById("url").value.trim(); if (url) scan(url); });
 document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { document.getElementById("url").value = c.dataset.u; scan(c.dataset.u); }));
 
-/* deep-link: #review opens the reviewer tab */
+/* render the comparison matrix on load */
+renderCompare();
+
+/* deep-link: #review / #compare open that tab */
 if (location.hash === "#review") selectTab("tab-review");
+if (location.hash === "#compare") selectTab("tab-compare");
 </script>
 
 </body>
