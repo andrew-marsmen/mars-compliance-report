@@ -17,6 +17,7 @@
     --red: #ff5a5a; --red-bg: #2a1414; --green: #54d18c; --green-bg: #122a1d;
     --high: #ff5a5a; --medium: #ffb020; --low: #6c8cff;
     --claims: #ff8a3d; --a11y: #4fb6ff;
+    --conv: #b18cff; --conv-bg: #1a1530;
     --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
     --sans: "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
   }
@@ -103,6 +104,15 @@
   .cmp .h, .col .h { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 6px; }
   .cmp .cur .h, .col.cur .h { color: var(--high); } .cmp .sug .h, .col.sug .h { color: var(--green); }
   .col .txt { color: var(--text); font-family: var(--mono); }
+  .conv { margin-top: 12px; background: var(--conv-bg); border: 1px solid rgba(177,140,255,.28);
+    border-radius: 10px; padding: 12px 14px; }
+  .conv .convh { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--conv); margin-bottom: 8px; }
+  .conv .convh span { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--muted);
+    font-size: 12px; margin-left: 6px; }
+  .conv ul { margin: 0; padding-left: 18px; }
+  .conv li { color: var(--text); font-size: 13px; line-height: 1.55; margin: 5px 0; }
+  .conv li b { color: var(--conv); font-weight: 600; }
 
   footer { border-top: 1px solid var(--line); padding: 30px 0 70px; color: var(--faint); font-size: 12.5px; line-height: 1.7; }
   footer strong { color: var(--muted); } footer em { color: var(--muted); font-style: italic; }
@@ -236,7 +246,7 @@
         <div class="step"><div class="k">02 — Flag</div><h3>Run two rule engines</h3>
           <p>Every line of copy is checked against an FTC/FDA claims lexicon; the markup is checked against WCAG 2.2. Each hit is tagged with its regulation, severity, and priority.</p></div>
         <div class="step"><div class="k">03 — Fix</div><h3>Hand back the rewrite</h3>
-          <p>Each finding shows the flagged text, <em>why</em> it's a risk, and a ready-to-paste <b>Current → Suggested</b> fix — so the team can action it, not just read about it.</p></div>
+          <p>Each finding shows the flagged text, <em>why</em> it's a risk, and a ready-to-paste <b>Current → Suggested</b> fix. Where a compliant rewrite would cost conversion, it also hands back <b>compliant swaps that still sell</b> — verifiable social proof, survey-backed stats, ingredient specificity — so the copy stays sharp.</p></div>
       </div>
     </section>
 
@@ -278,6 +288,13 @@
         <div class="cmp">
           <div class="box cur"><div class="h">✕ Current</div>Tongkat Ali blocks stress hormones</div>
           <div class="box sug"><div class="h">✓ Suggested</div>studied for its role in supporting a healthy stress response</div>
+        </div>
+        <div class="conv">
+          <div class="convh">↑ Keep conversion up <span>compliant swaps that still sell</span></div>
+          <ul>
+            <li><b>Keep the science hook, drop the drug verb</b> — "Tongkat Ali is studied for supporting a healthy stress response, which is linked to hormone balance." You keep the "why it works" angle without the drug claim.</li>
+            <li><b>Trade vague hype for ingredient specificity</b> — name the dose and the research so the ingredient carries the credibility a superlative used to.</li>
+          </ul>
         </div>
       </div>
       <div class="ex high">
@@ -444,6 +461,14 @@ function selectTab(id) {
 tabs.forEach(t => t.addEventListener('click', () => selectTab(t.id)));
 
 /* ---- review rendering ---- */
+function convHTML(f) {
+  if (!f.conversionSafe || !f.conversionSafe.length) return "";
+  const items = f.conversionSafe.map(s =>
+    `<li><b>${esc(s.label)}</b> — ${esc(s.tip)}</li>`).join("");
+  return `<div class="conv">
+    <div class="convh">↑ Keep conversion up <span>compliant swaps that still sell</span></div>
+    <ul>${items}</ul></div>`;
+}
 function card(f) {
   const title = f.domain === "claims"
     ? `“${esc(f.flagged.length > 90 ? f.flagged.slice(0, 90) + "…" : f.flagged)}”`
@@ -467,6 +492,7 @@ function card(f) {
         <div class="col cur"><div class="h">✕ Current</div><div class="txt">${esc(f.flagged)}</div></div>
         <div class="col sug"><div class="h">✓ Suggested</div><div class="txt">${esc(f.suggest)}</div></div>
       </div>
+      ${convHTML(f)}
     </div>
     <div class="rfooter"><span class="prio">${esc(f.priority)}</span>${wcag}</div>
   </div>`;
@@ -535,6 +561,10 @@ function toMarkdown() {
     lines.push(`- **Flagged:** ${f.flagged}`);
     lines.push(`- **Why:** ${f.why}`);
     lines.push(`- **Suggested fix:** ${f.suggest}`);
+    if (f.conversionSafe && f.conversionSafe.length) {
+      lines.push(`- **Keep conversion up (compliant swaps that still sell):**`);
+      f.conversionSafe.forEach(s => lines.push(`    - ${s.label} — ${s.tip}`));
+    }
     lines.push(`- **Priority:** ${f.priority}${f.wcag ? ` · WCAG ${f.wcag}` : ""}`);
     lines.push(``);
   }
